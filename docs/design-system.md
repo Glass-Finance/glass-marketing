@@ -217,7 +217,10 @@ Critical's X-large uses `20/24/20/24` (h=64) — narrower horizontally than Prim
 > "Join Your Community", hero "Create Your Community" / "Join A Community", footer
 > "Get Started Free". Implementation is the shared `ui/LandingCta` component — do not
 > hand-roll the styles at a call site. **Product surfaces (dashboard, auth, member app)
-> never use it.** "Sign In" stays on the outline/text treatment even on landing.
+> never use it.** The **members-view** navbar "Sign In" also uses it (owner decision,
+> 2026-10-12): it was a blue `Button` (`bg-brand` + `rounded-g-1`), which read as a second
+> brand-blue CTA sitting directly beside the white pill. The **organizations-view** navbar
+> "Sign In" is deliberately unchanged and stays on the outline/text treatment.
 
 ### 2.3 States
 
