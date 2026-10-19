@@ -17,7 +17,7 @@ Same core stack as `glass-waitlist`, minus everything app-specific — no React 
 | Framework  | React 19, React Router 7 (SPA)                          |
 | Build      | Vite 7                                                  |
 | Styling    | Tailwind CSS 4 (CSS-first, no config file)              |
-| Animation  | GSAP, Motion                                            |
+| Animation  | Motion                                                  |
 | Fonts      | Fontsource (Inter, DM Sans, Playfair Display, Urbanist) |
 | Icons      | Lucide                                                  |
 | Images     | Cloudinary                                              |

@@ -91,9 +91,16 @@ const VARIANTS = {
   // wins on source order (Tailwind has no conflicting h-* utilities here, but
   // relying on class order for a spec'd value is fragile -- if a size is ever
   // passed together with tertiary, check which h-* lands).
+
+  // Renders the "Subtle" variant: #000000 @60% muted ink, NOT brand blue.
+  // The blue default is library-only -- every tertiary the file actually
+  // places on a page ("Back", "See All", breadcrumbs) is Subtle, so that is
+  // what this role renders. The previous text-brand here leaked blue into
+  // every back link and See-All link. Use `outline` when a blue text link is
+  // genuinely wanted. Ported from glass-waitlist, which made the same change.
   tertiary: {
-    on: "bg-transparent text-brand hover:bg-black/5 active:bg-black/10",
-    off: "bg-transparent text-brand opacity-60",
+    on: "bg-transparent text-black/60 hover:bg-black/5 active:bg-black/10",
+    off: "bg-transparent text-black/60 opacity-60",
   },
 };
 

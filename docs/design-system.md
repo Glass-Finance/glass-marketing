@@ -8,6 +8,26 @@
 > This document is normative. When code disagrees with this file, the code is wrong — unless
 > §0 says otherwise. Do not "clean up" a value to match a Tailwind default; match this spec.
 
+> ### ⚠️ This copy is an adapted fork, NOT a byte-mirror of `glass-waitlist`'s
+>
+> Both repos carry a `docs/design-system.md`, and the app repo's is usually newer — but the
+> two have **deliberately diverged structurally**, so do not wholesale-copy one over the other:
+>
+> - **Section numbers differ.** The app repo's copy carries a `§9.7 Settings rows` for
+>   `dashboard/settings/Settings.jsx`, which does not exist on this marketing-only site. That
+>   is why the footer watermark is `§9.7` **here** and `§9.8` there. Copying the app's file
+>   wholesale shifts every §9.x reference by one and imports app-only sections.
+> - **App-only sections do not belong here** — `§2.2c Mobile Back Button` (member-app screen
+>   furniture; there is no `ui/MobileBackButton` in this repo), `§2.2d Tight label decoupling`
+>   (dashboard CTAs) and `§9.7 Settings rows`.
+> - **Copy the decisions, not the file.** When porting, take the substantive call (e.g. §2.1's
+>   "tertiary renders Subtle, not brand blue") and drop it into _this_ numbering and _this_
+>   repo's component set.
+>
+> Cross-repo notes that point at the other repo also go stale — the app repo's `§9.8` still
+> says this repo's `Footer.jsx` "has the off-palette radial glow and no watermark", which was
+> fixed here in `645c3f7`. Verify a cross-repo claim against the actual file before acting.
+
 ---
 
 ## 0. Read this first — three things that will trip you up
@@ -104,13 +124,25 @@ Six roles. All **Inter**, label weight **500**, border radius **4px at rest**.
 
 ### 2.1 Role matrix
 
-| Role         | Fill           | Label                             | Stroke              | Radius              |
-| ------------ | -------------- | --------------------------------- | ------------------- | ------------------- |
-| **Primary**  | `#002fa7`      | `#ffffff`                         | —                   | **4px, all states** |
-| **Outline**  | **none**       | `#002fa7` · `#000000` · `#db0000` | `#000000 @10%`, 1px | 4px                 |
-| **Tertiary** | none           | `#002fa7` · `#db0000`             | none                | 4px, height 24      |
-| **Critical** | `#db0000`      | `#ffffff`                         | —                   | 4px                 |
-| **Tonal**    | `#ffffff @60%` | `#002fa7`                         | `#000000 @10%`, 1px | 4px                 |
+| Role         | Fill           | Label                                      | Stroke              | Radius              |
+| ------------ | -------------- | ------------------------------------------ | ------------------- | ------------------- |
+| **Primary**  | `#002fa7`      | `#ffffff`                                  | —                   | **4px, all states** |
+| **Outline**  | **none**       | `#002fa7` · `#000000` · `#db0000`          | `#000000 @10%`, 1px | 4px                 |
+| **Tertiary** | none           | **`#000000 @60%`** · `#002fa7` · `#db0000` | none                | 4px, height 24      |
+| **Critical** | `#db0000`      | `#ffffff`                                  | —                   | 4px                 |
+| **Tonal**    | `#ffffff @60%` | `#002fa7`                                  | `#000000 @10%`, 1px | 4px                 |
+
+> **Tertiary renders the "Subtle" variant.** `Tertiary Button` (1:11927) is a component set of
+> two label colours: brand blue `#002fa7` and a **Subtle** variant at `#000000 @60%`. The blue
+> default exists in the library but is **never placed on a page** — every tertiary the file
+> actually uses ("Back", "See All", breadcrumbs) is Subtle. `ui/Button` therefore renders
+> tertiary as muted ink, not brand blue; rendering it blue leaked brand blue into every back
+> link and See-All link. Use `outline` when a blue text link is actually wanted.
+>
+> This repo carried the blue default until 2026-10-19; the correction is ported from
+> `glass-waitlist`, which made the same change. The brand-blue rail is the one place tertiary
+> sits on a coloured surface; its icon buttons pin `className="text-white"` rather than
+> inheriting the role.
 
 > ### ⚠️ Extension: Success and Warning are NOT in Figma
 >

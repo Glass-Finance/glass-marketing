@@ -20,7 +20,7 @@ What's tested today:
   ported as-is from `glass-waitlist`; targeted render tests add little
   against the porting risk (which is "did the copy drift", caught by
   eyeballing the two sites side by side, not by unit assertions).
-- Animations (`BlurText`, `VariableProximity`, GSAP) are largely
+- Animations (`BlurText`, `VariableProximity`, Motion) are largely
   imperative/DOM-timing code; testing them is brittle.
 
 ## CI
