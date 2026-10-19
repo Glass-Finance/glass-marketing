@@ -520,6 +520,17 @@ export default function ProblemSection() {
               <li
                 key={when}
                 data-role="step"
+                // role="button" on an <li> is flagged by
+                // no-noninteractive-element-to-interactive-role. This is
+                // deliberate: each step is a control (it restarts the demo),
+                // so it needs a button role, and it carries tabIndex +
+                // onKeyDown below so it is genuinely keyboard-operable.
+                // A native <button> would also satisfy the rule, but nesting
+                // one inside the <ol> changes the DOM the surrounding CSS and
+                // the reset-button reset animation are keyed to -- a layout
+                // regression I can't verify visually from here. Suppress here
+                // rather than weaken the rule for the whole repo.
+                // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
                 role="button"
                 tabIndex={0}
                 aria-label={`Replay from step ${i + 1}: ${where}`}

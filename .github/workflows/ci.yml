@@ -28,6 +28,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Runs before the other gates so a vulnerable dependency fails fast,
+      # at the point where the fix is a one-line version bump. `high` is the
+      # threshold deliberately: the 3 remaining moderate advisories
+      # (@humanfs/node, @vitest/mocker) are dev-only test tooling with no
+      # fixed release yet, and a gate that cannot go green is a gate people
+      # learn to ignore. Bump the threshold once those ship fixes.
+      - name: Audit dependencies (high+)
+        run: npm audit --audit-level=high
+
       - name: Format check
         run: npm run format:check
 
