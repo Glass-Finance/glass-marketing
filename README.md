@@ -41,12 +41,12 @@ npm run dev            # starts on http://localhost:5173
 
 `VITE_CLOUDINARY_CLOUD_NAME` is the one required at **build time**: `import.meta.env.VITE_*` values are inlined by Vite when the bundle compiles, so if it's missing every image URL ships as `res.cloudinary.com/undefined/...` and the site renders as a blank page. `scripts/check-build-env.mjs` runs before `npm run build` and **fails the build** if it's absent. Set it in `.env`, in the Vercel project's Environment Variables, and in `.github/workflows/ci.yml` (CI supplies `ece5jmhy`).
 
-| Variable                     | Required | Purpose                                                                                                                                                                                                |
-| ---------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `VITE_CLOUDINARY_CLOUD_NAME` | **Yes**  | Cloudinary cloud name for image delivery. Required to build — missing it fails the build via `scripts/check-build-env.mjs`.                                                                            |
-| `VITE_APP_URL`               | No       | Origin of the real application that `goToApp()` redirects to. Defaults to `https://app.glasspay.app`, so it's safe to skip unless pointing at a different deployment (e.g. staging).                   |
-| `VITE_CRISP_WEBSITE_ID`      | No       | Crisp chat widget ID (`CrispChat.jsx`, rendered from `Footer.jsx`). Leave unset to disable chat — the current default.                                                                                 |
-| `VITE_SENTRY_DSN`            | Production: yes | Enables Sentry crash/error reporting (`src/utils/monitoring.js`). Production is configured; unset locally to disable monitoring. |
+| Variable                     | Required        | Purpose                                                                                                                                                                              |
+| ---------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `VITE_CLOUDINARY_CLOUD_NAME` | **Yes**         | Cloudinary cloud name for image delivery. Required to build — missing it fails the build via `scripts/check-build-env.mjs`.                                                          |
+| `VITE_APP_URL`               | No              | Origin of the real application that `goToApp()` redirects to. Defaults to `https://app.glasspay.app`, so it's safe to skip unless pointing at a different deployment (e.g. staging). |
+| `VITE_CRISP_WEBSITE_ID`      | No              | Crisp chat widget ID (`CrispChat.jsx`, rendered from `Footer.jsx`). Leave unset to disable chat — the current default.                                                               |
+| `VITE_SENTRY_DSN`            | Production: yes | Enables Sentry crash/error reporting (`src/utils/monitoring.js`). Production is configured; unset locally to disable monitoring.                                                     |
 
 Upload-script-only credentials (`scripts/upload-assets-to-cloudinary.mjs`) are server-side values that are never shipped to the browser: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`. Keep them in `.env` (gitignored), not committed.
 
