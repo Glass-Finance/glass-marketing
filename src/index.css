@@ -82,6 +82,7 @@
   --animate-slideInUp: slideInUp 0.8s ease-out forwards;
   --animate-scaleIn: scaleIn 0.6s ease-out forwards;
   --animate-float: float 3s ease-in-out infinite;
+  --animate-logo-fill: logo-fill var(--logo-fill-duration, 2.6s) ease-in-out infinite;
 
   /* Problem sections — durations/fill modes paired with the hand-written
      keyframes further down this file. Referenced from the JSX as
@@ -210,6 +211,29 @@ body {
   }
   50% {
     transform: translateY(-10px);
+  }
+}
+
+/* BrandedSpinner's logo-fill loop — kept in sync with glass-waitlist's
+   index.css. The top logo layer reveals bottom-to-top (inset clip), holds
+   full, then fades out; the ghost layer underneath stays visible. Duration
+   is set per-instance via --logo-fill-duration (network-adaptive). */
+@keyframes logo-fill {
+  0% {
+    clip-path: inset(100% 0 0 0);
+    opacity: 1;
+  }
+  72% {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+  88% {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    opacity: 0;
   }
 }
 
