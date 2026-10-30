@@ -510,35 +510,35 @@ section {
 /* ── Crisp support-chat launcher ─────────────────────────────────────────
    Kept in sync with glass-waitlist's index.css — same Crisp website ID on
    both properties, so the landing and the app must render the same
-   launcher. The stock widget is a ~60px circle carrying Crisp's default
-   icon; per design it's a compact 48px launcher whose 24px white bubble
-   glyph sits on the icon-spec blue (#2563EB) — the glyph lives at
-   public/crisp-launcher-glyph.svg and is swapped in over whatever icon
-   source Crisp injects (both the <img> and background-image variants of
-   their loader are covered).
+   launcher. Per design: a compact 48px launcher whose 24px white bubble
+   glyph (public/crisp-launcher-glyph.svg) sits on the icon-spec blue
+   (#2563EB).
 
-   Selectors stick to stable hooks only: the #crisp-chatbox root, its
-   launcher anchor, and descendants of that anchor — the open chat window
-   is a sibling branch, so agent avatars inside it are never touched. These
-   rules are unlayered and carry !important because Crisp sets size via
-   inline styles. vercel.json's img-src 'self' (enforced + report-only
-   CSP) covers the self-hosted SVG. */
-#crisp-chatbox > div > a,
-#crisp-chatbox > div > a > div {
+   Structure verified against the live widget (2026-10-30): the launcher is
+   a DIV, not an anchor — #crisp-chatbox > div > div[role="button"] — and
+   the icon stack is spans: the circle layer span[data-id="chat_closed"],
+   a white disc, then an innermost span whose background-image (the
+   dashboard-set Glass logo) arrives as an INLINE !important style. Inline
+   !important beats author !important, so that layer can only be hidden
+   (opacity), not repainted; the glyph is painted on the circle span
+   instead. The pre-chat entice toast is a sibling layer inside the button
+   and the open chat window is a separate branch — neither is touched.
+   Selectors avoid Crisp's hashed cc-* classes on purpose. img-src 'self'
+   in vercel.json covers the self-hosted SVG. */
+#crisp-chatbox > div > div[role="button"] {
   width: 48px !important;
   height: 48px !important;
-  background-color: #2563eb !important;
 }
 
-#crisp-chatbox > div > a > div {
+#crisp-chatbox > div > div[role="button"] span[data-id="chat_closed"] {
+  background-color: #2563eb !important;
   background-image: url("/crisp-launcher-glyph.svg") !important;
   background-size: 24px 24px !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
 }
 
-#crisp-chatbox > div > a img {
-  content: url("/crisp-launcher-glyph.svg") !important;
-  width: 24px !important;
-  height: 24px !important;
+/* Neutralize the inner icon stack (white disc + dashboard logo layer). */
+#crisp-chatbox > div > div[role="button"] span[data-id="chat_closed"] span {
+  opacity: 0 !important;
 }
