@@ -102,18 +102,14 @@ export default function Hero() {
           style={{ fontFamily: "Inter,-apple-system,sans-serif" }}
         >
           <Reveal variant="up" delay={80}>
-            <h1
-              className="font-semibold text-white leading-[1.05] tracking-tight mb-5 text-center max-w-[480px] lg:max-w-[720px] mx-auto"
-              style={{ fontSize: "clamp(34px,8.5vw,70px)" }}
-            >
-              Community Finance
-              <br className="lg:hidden" /> Crystal Clear
+            <h1 className="mx-auto mb-5 max-w-[885px] text-center text-[clamp(34px,6vw,64px)] font-bold leading-[1.05] tracking-tight text-white">
+              Manage Community Payments Effortlessly.
             </h1>
           </Reveal>
           <Reveal variant="up" delay={160}>
-            <p className="text-[15px] sm:text-[16px] text-white/55 leading-relaxed max-w-[540px] mx-auto mb-8 sm:mb-6">
-              Save 15–20 hours monthly chasing payments. The transparent way for Nigerian
-              associations, clubs, and schools to manage funds.
+            <p className="mx-auto mb-8 max-w-[767px] text-[16px] leading-relaxed text-white/70 sm:text-[18px]">
+              Create payment plans, collect dues and contributions, and track every member&apos;s
+              payment in one place. No more chasing transfers or updating spreadsheets.
             </p>
           </Reveal>
           <Reveal variant="up" delay={240}>

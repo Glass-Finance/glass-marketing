@@ -10,14 +10,14 @@ import OurSolution from "../components/organizations/OurSolution";
 import GetStarted from "../components/organizations/GetStarted";
 import UseCases from "../components/UseCases";
 import TrustedBy from "../components/TrustedBy";
-import Security from "../components/Security";
+import OrganizationSecurity from "../components/organizations/OrganizationSecurity";
 import CTA from "../components/organizations/CTA";
 import WhyGlass from "../components/WhyGlass";
 import Footer from "../components/Footer";
 
 export default function OrganizationsHome() {
   useSeoMeta({
-    title: "Community Finance, Crystal Clear",
+    title: "Manage Community Payments Effortlessly",
     description:
       "Stop chasing dues in group chats. Glasspay lets Nigerian associations, clubs, and schools collect, track, and manage community funds in one place.",
     path: "/",
@@ -50,7 +50,7 @@ export default function OrganizationsHome() {
       <GetStarted />
       <UseCases />
       <TrustedBy />
-      <Security />
+      <OrganizationSecurity />
       <CTA />
       <WhyGlass />
       <Footer />

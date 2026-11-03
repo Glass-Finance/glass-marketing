@@ -21,15 +21,7 @@
 import { useEffect, useRef } from "react";
 import { cldUrl } from "../../lib/cloudinary";
 import { Button } from "../ui/Button";
-
-/* The five beats of the story, in order. */
-const STEPS = [
-  ["Fri · 6:10 PM", "Group chat", "Claims with screenshots nobody can verify."],
-  ["Fri · 7:08 PM", "Bank alerts", "They name a sender, never a member or a due."],
-  ["Sat · 10:05 AM", "Reconciling by hand", "Alerts, notes and screenshots compared one by one."],
-  ["Sun · 8:30 PM", "Spreadsheet", "Typed in late. The totals still don't match the bank."],
-  ["Sat · 11:42 PM", "A member asks", "Where is the money going? No statement to check."],
-];
+import ProblemStoryBackdrop from "../ProblemStoryBackdrop";
 
 /**
  * Class map for the markup the timeline injects. Keys are the semantic role;
@@ -376,14 +368,9 @@ export default function ProblemSection() {
           if (run !== R) throw 0; // superseded — unwind quietly
         });
 
-      const markers = $$("step");
       try {
         $("verdict").classList.remove("on");
         for (let i = index; i < SCENES.length; i++) {
-          markers.forEach((m, k) => {
-            m.classList.toggle("active", k === i);
-            m.classList.toggle("done", k < i);
-          });
           $$("scene").forEach((s, k) => s.classList.toggle("on", k === i));
           // Marks the stage so its height can follow the active scene's content
           // on phones (see the [data-role="stage"][data-scene] rules in
@@ -395,12 +382,11 @@ export default function ProblemSection() {
           await SCENES[i](wait);
           if (i < SCENES.length - 1) await wait(500);
         }
-        markers.forEach((m) => m.classList.add("done"));
         $("verdict").classList.add("on");
         await wait(5000);
         play(0);
       } catch {
-        /* stopped: replay clicked, a step was jumped to, or unmounted */
+        /* stopped: replay clicked or component unmounted */
       }
     }
 
@@ -511,77 +497,12 @@ export default function ProblemSection() {
         </div>
 
         {/* ── Player ── */}
-        <div
-          data-role="player"
-          className="mt-5 grid grid-cols-[340px_minmax(0,1fr)] items-stretch gap-8 max-[1040px]:grid-cols-1"
-        >
-          <ol className="relative m-0 list-none gap-2 overflow-x-auto p-0 max-[1040px]:flex">
-            {STEPS.map(([when, where, why], i) => (
-              <li
-                key={when}
-                data-role="step"
-                // role="button" on an <li> is flagged by
-                // no-noninteractive-element-to-interactive-role. This is
-                // deliberate: each step is a control (it restarts the demo),
-                // so it needs a button role, and it carries tabIndex +
-                // onKeyDown below so it is genuinely keyboard-operable.
-                // A native <button> would also satisfy the rule, but nesting
-                // one inside the <ol> changes the DOM the surrounding CSS and
-                // the reset-button reset animation are keyed to -- a layout
-                // regression I can't verify visually from here. Suppress here
-                // rather than weaken the rule for the whole repo.
-                // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
-                role="button"
-                tabIndex={0}
-                aria-label={`Replay from step ${i + 1}: ${where}`}
-                onClick={() => restartRef.current(i)}
-                onKeyDown={(e) => {
-                  // Each step restarts the demo from that point, which is why
-                  // these look like controls. Without this the whole timeline
-                  // was reachable by mouse only -- a keyboard user could not
-                  // scrub back to an earlier step at all.
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    restartRef.current(i);
-                  }
-                }}
-                className="group relative cursor-pointer pb-[22px] pl-[52px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-[1040px]:flex max-[1040px]:flex-none max-[1040px]:items-center max-[1040px]:p-0 [&::before]:absolute [&::before]:bottom-[2px] [&::before]:left-[15px] [&::before]:top-[34px] [&::before]:border-l-2 [&::before]:border-dashed [&::before]:border-[#cdd0e2] [&::before]:content-[''] max-[1040px]:[&::before]:hidden [&:last-child::before]:hidden [.done_&]:[&::before]:border-solid"
-              >
-                <span className="absolute top-0 left-0 grid size-8 place-items-center rounded-full border-2 border-[#cdd0e2] bg-white text-[13px] font-semibold text-[#6b7280] transition duration-400 group-[.active]:border-[#002fa7] group-[.active]:bg-[#002fa7] group-[.active]:text-white group-[.active]:shadow-[0_0_0_6px_rgba(59,43,184,0.14)] [.done_&]:border-[#002fa7] [.done_&]:text-[#002fa7] max-[1040px]:static max-[1040px]:size-7 [&.done_&>b]:hidden max-[1040px]:[&.done_&>b]:block max-[1040px]:[&.done_&>b]:text-[15px]">
-                  <b>{i + 1}</b>
-                </span>
-                <div className="text-[11.5px] font-semibold tracking-[0.05em] text-[#6b7280] uppercase max-[1040px]:hidden">
-                  {when}
-                </div>
-                <h4 className="mt-0.5 text-[18px] tracking-[-0.01em] text-[#9a9db3] transition duration-300 group-[.active]:text-[#0f1d6e] group-[.done]:text-[#0f1d6e] max-[1040px]:hidden max-[1040px]:group-[.active]:block max-[1040px]:group-[.active]:mt-0 max-[1040px]:group-[.active]:ml-2">
-                  {where}
-                </h4>
-                <p className="mt-0 max-h-0 translate-y-[-8px] overflow-hidden text-[15px] leading-[1.45] transition duration-500 group-[.active]:mt-1 group-[.active]:max-h-20 group-[.active]:translate-y-0 max-[1040px]:hidden">
-                  {why}
-                </p>
-              </li>
-            ))}
-          </ol>
-
+        <div data-role="player" className="mt-5">
           <div
             data-role="stage"
-            className="relative min-h-[640px] overflow-hidden rounded-[20px] bg-[linear-gradient(160deg,#d8d9de,#bfc1c9)] transition-[min-height] duration-500 max-[1040px]:min-h-[620px] max-[600px]:min-h-[620px]"
+            className="relative isolate min-h-[640px] overflow-hidden rounded-[20px] border border-black/10 transition-[min-height] duration-500 max-[1040px]:min-h-[620px] max-[600px]:min-h-[620px]"
           >
-            {/* Decorative logo marks */}
-            <img
-              src={cldUrl("glass/problem/logo-mark-lg", { width: 520 })}
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none absolute right-[-30px] top-[-10px] w-[520px] animate-[var(--animate-gps-drift)] max-[600px]:right-0 max-[600px]:w-[210px]"
-            />
-            <img
-              src={cldUrl("glass/problem/logo-mark-sm", { width: 150 })}
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none absolute bottom-[30px] left-0 w-[150px] animate-[var(--animate-gps-drift)] max-[600px]:bottom-[16px] max-[600px]:w-[90px]"
-              style={{ animationDelay: "-6s" }}
-            />
-
+            <ProblemStoryBackdrop className="absolute inset-0 rounded-[20px]" />
             {/* ── Scene 1: group chat ── */}
             <div
               data-role="scene"

@@ -9,7 +9,7 @@ export default function CTA() {
     <CTASection
       headline="Bring clarity to your community finances."
       subtext="Simplify payments. Eliminate follow-ups."
-      buttonLabel="Create Your Community"
+      buttonLabel="Create A Community"
       buttonHoverVariant="magnetic"
       onButtonClick={() => goToApp("/sign-up", navigate)}
     />

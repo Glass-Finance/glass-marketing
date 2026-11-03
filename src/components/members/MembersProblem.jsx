@@ -1,10 +1,10 @@
 /**
- * Member "Problem" section — the expanding accordion.
+ * Member "Problem" section — three stacked story panels.
  *
  * Ported from the design export (Downloads/glasspay-problem-section.html).
- * Each panel is a pain point; the active one grows, holds for a beat, then
- * plays a short "story" (the reminder getting buried, app-switching to pay,
- * hunting for proof of payment) before the carousel moves on.
+ * The active panel plays a short story (the reminder getting buried,
+ * app-switching to pay, hunting for proof of payment) before the carousel
+ * moves on.
  *
  * Styling is Tailwind-only. The long class strings that the design repeats
  * many times (panels, rails, tiles, reels) are declared once as constants
@@ -21,22 +21,15 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeftRight, Clock3, Eye } from "lucide-react";
 import { cldSrcSet, cldUrl } from "../../lib/cloudinary";
+import ProblemStoryBackdrop from "../ProblemStoryBackdrop";
+import { Button } from "../ui/Button";
 
 const DWELL = 8000;
 const STORY = 2800;
 const STEP = 1700;
 const RESUME = 3500;
-
-/* Mirrors the 1000px breakpoint: JS writes explicit panel heights for the
-   stacked layout, so the numbers have to agree with the classes below. */
-const MOBILE_MAX = 1000;
-const STRIP_H = 78;
-const STORY_TOP = 54;
-const STORY_GAP = 22;
-
-/* Must match the mobile half of TILE_SCENE. */
-const TILE_SCENE_H = 300;
 
 /* Screenshot frames are display-capped by their container; these buckets
    cover 1x–2x without over-fetching. */
@@ -49,7 +42,6 @@ const LEDE =
 /* ── Palette, straight from the design export ────────────────────────────────
    Hardcoded rather than tokenised, matching every other landing component
    in this repo. */
-const BORDER = "border-[#ecedf3]";
 const EASE = "cubic-bezier(0.7,0,0.2,1)";
 
 /* The auto-scrolling stack is revealed only as it scrolls (it sits above the
@@ -67,18 +59,21 @@ const PANELS = [
     title: "Missing Payment Deadlines?",
     desc: "Important reminders get lost in group chats.",
     kind: "chat",
+    icon: Clock3,
   },
   {
     id: "switching",
     title: "Still Switching Between Apps To Pay?",
     desc: "Copying account numbers and switching apps turns a simple payment into a chore.",
     kind: "tiles",
+    icon: ArrowLeftRight,
   },
   {
     id: "proof",
     title: "Can't See What You've Already Paid?",
     desc: "You end up scrolling through chats for proof of payment.",
     kind: "receipts",
+    icon: Eye,
   },
 ];
 
@@ -110,37 +105,10 @@ const RECEIPTS = Array.from({ length: 7 }, (_, i) => `glass/problem/receipt-${i 
 /* ── Repeated class sets ───────────────────────────────────────────────────
    Kept as constants so the design's values appear exactly once. */
 
-const PANEL_BASE = [
-  "group relative flex-1 min-w-0 overflow-hidden rounded-[16px] bg-white cursor-pointer",
-  "border transition-[flex-grow,height] duration-[850ms] [transition-timing-function:var(--tw-ease)]",
-  "shadow-[0_12px_30px_rgba(15,29,110,0.07)]",
-  BORDER,
-].join(" ");
-
-const PANEL_ACTIVE = [
-  "[flex-grow:3.4] cursor-default bg-[#f7f8fc] border-[#e4e5ec]",
-  "shadow-[0_30px_60px_rgba(15,29,110,0.16)]",
-].join(" ");
-
-const RAIL = `absolute inset-0 flex flex-col items-center justify-between py-[26px] transition-transform duration-600 [transition-timing-function:${EASE}]`;
-
-const BODY_PANEL = [
-  "absolute inset-0 px-8 pt-[34px] pb-[30px] transition-[clip-path,visibility] duration-700",
-  `[transition-timing-function:${EASE}] [clip-path:inset(0_100%_0_0)] invisible`,
-  "group-[.on]:visible group-[.on]:[clip-path:inset(0)] group-[.on]:[transition-delay:150ms,0s]",
-  /* Stacked layout: the panel grows with its content, so the body is in flow
-     rather than pinned to the panel box. */
-  "max-[1000px]:relative max-[1000px]:inset-auto max-[1000px]:px-5 max-[1000px]:pt-[26px] max-[1000px]:pb-7",
-].join(" ");
-
 const SCENE = [
-  "absolute left-8 right-8 bottom-10 h-(--mps-sht) transition-[height,bottom,left,right] duration-800",
+  "absolute inset-x-6 top-1/2 h-[340px] -translate-y-1/2 transition-[height] duration-800",
   `[transition-timing-function:${EASE}] @container`,
-  "group-[.full]:left-6 group-[.full]:right-6 group-[.full]:bottom-6 group-[.full]:h-(--mps-shf)",
-  /* In flow on phones: the offsets would shift a relatively-positioned box,
-     so they are all reset and the gap becomes a margin instead. */
-  "max-[1000px]:relative max-[1000px]:inset-auto max-[1000px]:left-auto max-[1000px]:right-auto max-[1000px]:bottom-auto max-[1000px]:mt-[22px] max-[1000px]:max-w-[760px]",
-  "max-[1000px]:group-[.full]:left-auto max-[1000px]:group-[.full]:right-auto max-[1000px]:group-[.full]:bottom-auto max-[1000px]:group-[.full]:mt-0",
+  "max-[1000px]:inset-x-4 max-[1000px]:h-[220px]",
 ].join(" ");
 
 const FRAME =
@@ -169,31 +137,12 @@ const TILE_ACTIVE = [
   "max-[1000px]:max-w-[178px]",
 ].join(" ");
 
-/* The tiles are tall portrait captures in a wide row. At the full scene
-   height `cover` matches on width and crops the sides, so the entire height
-   shows — including the blank lower half of each screenshot. Capping the
-   height flips the crop to vertical, trimming that gap and leaving the tiles
-   roughly square. */
-const TILE_SCENE = [
-  "h-[340px]!",
-  "group-[.full]:h-[340px]!",
-  "max-[1000px]:h-[300px]!",
-  "max-[1000px]:group-[.full]:h-[300px]!",
-  /* Shorter than the other panels' scene, so it is centred in the panel
-     rather than left hanging off the bottom. The mobile half is back in
-     normal flow (see SCENE), where offsets do not apply. */
-  "top-1/2!",
-  "-translate-y-1/2!",
-  "bottom-auto!",
-  "max-[1000px]:top-auto!",
-  "max-[1000px]:translate-y-0!",
-  "max-[1000px]:bottom-auto!",
-].join(" ");
+const TILE_SCENE = "h-[340px]! max-[1000px]:h-[220px]!";
 
 const MONO_KICKER =
-  "block font-[JetBrains_Mono] text-[12px] font-semibold tracking-[0.08em] uppercase text-[#002fa7]";
+  "block font-[JetBrains_Mono] text-[clamp(8px,0.9vw,12px)] font-semibold tracking-[0.08em] uppercase text-[#002fa7]";
 
-const REEL_TEXT = "text-[clamp(26px,3vw,38px)] font-bold leading-[1.3] tracking-[-0.03em]";
+const REEL_TEXT = "text-[clamp(12px,2.4vw,30px)] font-bold leading-[1.3] tracking-[-0.03em]";
 
 /** Screenshot with responsive delivery. */
 function Shot({ id, alt, position, width = 600 }) {
@@ -245,7 +194,6 @@ export default function MembersProblem() {
   const [step, setStep] = useState(0);
 
   const accRef = useRef(null);
-  const panelRefs = useRef([]);
   const timers = useRef([]);
 
   const reduceMotion =
@@ -259,50 +207,6 @@ export default function MembersProblem() {
   const later = useCallback((fn, ms) => {
     timers.current.push(setTimeout(fn, ms));
   }, []);
-
-  /**
-   * Size panels for the stacked (mobile) layout; a no-op on desktop, where
-   * flex-grow and a fixed accordion height do the work.
-   *
-   * The scene heights live in the section's `--mps-sht` / `--mps-shf`
-   * custom properties (restated by the 1000px breakpoint), so read them back
-   * from the DOM rather than duplicating the numbers here — otherwise the two
-   * would silently disagree.
-   */
-  const fit = useCallback(() => {
-    if (typeof window === "undefined" || window.innerWidth > MOBILE_MAX) {
-      panelRefs.current.forEach((el) => {
-        if (el) el.style.height = "";
-      });
-      return;
-    }
-
-    const section = accRef.current?.closest("section");
-    if (!section) return;
-    const styles = getComputedStyle(section);
-    const sceneH = parseFloat(styles.getPropertyValue("--mps-sht")) || 230;
-    const storyH = parseFloat(styles.getPropertyValue("--mps-shf")) || 430;
-
-    PANELS.forEach((_, i) => {
-      const el = panelRefs.current[i];
-      if (!el) return;
-
-      if (i !== active) {
-        el.style.height = `${STRIP_H}px`;
-        return;
-      }
-      if (story) {
-        // The tiles panel overrides the scene height (see TILE_SCENE), so it
-        // needs its own number here or the panel is padded with dead space.
-        const h = PANELS[i].kind === "tiles" ? TILE_SCENE_H : storyH;
-        el.style.height = `${STORY_TOP + STORY_GAP + h}px`;
-        return;
-      }
-      const copy = el.querySelector("[data-mps-copy]");
-      const copyH = copy ? copy.scrollHeight : 0;
-      el.style.height = `${STORY_TOP + copyH + STORY_GAP + sceneH}px`;
-    });
-  }, [active, story]);
 
   const go = useCallback(
     (next) => {
@@ -365,28 +269,14 @@ export default function MembersProblem() {
     return () => clearInterval(id);
   }, [active, story, reduceMotion]);
 
-  /* Panel measurement has to run after the browser lays the copy out. */
-  useEffect(() => {
-    fit();
-  }, [fit]);
-
-  useEffect(() => {
-    window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
-  }, [fit]);
-
   useEffect(() => clearTimers, [clearTimers]);
 
   const playing = story && !reduceMotion;
 
   return (
     <section
-      className="relative mx-auto max-w-[1240px] overflow-x-clip px-4 pt-[72px] pb-[88px] font-[Inter,sans-serif] text-[17px] leading-[1.55] [--mps-sht:250px] [--mps-shf:492px] max-[1000px]:pt-[56px] max-[1000px]:pb-16 max-[1000px]:[--mps-sht:170px] max-[1000px]:[--mps-shf:290px] max-[560px]:[--mps-sht:150px] max-[560px]:[--mps-shf:250px]"
+      className="relative mx-auto max-w-[1240px] overflow-x-clip px-4 pt-[72px] pb-[88px] font-[Inter,sans-serif] text-[17px] leading-[1.55] max-[1000px]:pt-[56px] max-[1000px]:pb-16"
       id="problem"
-      style={{
-        "--mps-mask-blue": `url("${cldUrl("glass/problem/mask-dots-blue", { width: 480 })}")`,
-        "--mps-mask-gradient": `url("${cldUrl("glass/problem/mask-dots-gradient", { width: 640 })}")`,
-      }}
     >
       <div className="relative text-center">
         <span className="inline-flex items-center rounded-full border border-brand-deep/25 px-5 py-2 text-[13px] font-medium text-brand-deep">
@@ -400,161 +290,135 @@ export default function MembersProblem() {
         </p>
       </div>
 
-      <div
-        className="relative mt-16 flex h-[540px] gap-3 max-[1000px]:mt-11 max-[1000px]:h-auto max-[1000px]:flex-col"
-        ref={accRef}
-      >
+      <div className="relative mt-16 flex flex-col gap-12 max-[1000px]:mt-11 max-[560px]:gap-9" ref={accRef}>
         {PANELS.map((panel, i) => {
           const on = i === active;
           const full = on && story;
+          const Icon = panel.icon;
 
           return (
-            <article
-              key={panel.id}
-              ref={(el) => {
-                panelRefs.current[i] = el;
-              }}
-              className={`${PANEL_BASE} ${on ? `on ${PANEL_ACTIVE}` : ""} ${full ? "full" : ""} max-[1000px]:h-[78px] max-[1000px]:flex-none max-[1000px]:max-[1000px]:[height:auto]`}
-              onClick={() => {
-                if (!on) go(i);
-              }}
-            >
-              {/* Masked decorative blobs. */}
-              <i
-                aria-hidden="true"
-                className="pointer-events-none absolute bottom-[70px] left-0 h-[120px] w-[55px] bg-[#002fa7] opacity-55 [mask-image:var(--mps-mask-blue)] [mask-size:contain] [mask-position:left_center] [mask-repeat:no-repeat] transition-opacity duration-600 group-[.on]:opacity-0 group-[:not(.on)]:hover:opacity-85 max-[1000px]:bottom-2 max-[1000px]:h-[62px] max-[1000px]:w-7"
-              />
-              <i
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-[60px] -right-[70px] h-[325px] w-[380px] rotate-[8deg] bg-[linear-gradient(90deg,#002FA7,#002fa7,#6b2fb5)] opacity-0 [mask-image:var(--mps-mask-gradient)] [mask-size:contain] [mask-position:center] [mask-repeat:no-repeat] transition-opacity delay-300 duration-600 group-[.on]:opacity-16 max-[1000px]:-top-10 max-[1000px]:-right-[50px] max-[1000px]:h-[197px] max-[1000px]:w-[230px]"
-              />
-
-              {/* Collapsed rail. */}
-              <div
-                className={`${RAIL} ${on ? "translate-y-[105%]" : ""} max-[1000px]:flex-row max-[1000px]:py-0 max-[1000px]:pr-[22px] max-[1000px]:pl-[52px] ${on ? "max-[1000px]:-translate-y-[105%]" : ""}`}
+            <article key={panel.id} className={`group relative ${on ? "on" : ""} ${full ? "full" : ""}`}>
+              <Button
+                type="button"
+                aria-pressed={on}
+                variant="tertiary"
+                size="md"
+                fullWidth={false}
+                onClick={() => go(i)}
+                className="!mb-5 !h-auto !p-0 flex w-full items-center justify-center gap-4 rounded-none border-0 bg-transparent text-left hover:bg-transparent active:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#002fa7] max-[560px]:justify-start"
               >
-                <span
-                  className={`max-h-[400px] text-[19px] font-bold tracking-[-0.01em] whitespace-nowrap text-[#0f1d6e] [writing-mode:vertical-rl] max-[1000px]:my-0 max-[1000px]:mr-auto max-[1000px]:ml-[14px] max-[1000px]:h-auto max-[1000px]:text-[18px] max-[1000px]:whitespace-normal max-[1000px]:[writing-mode:horizontal-tb] max-[1000px]:transform-none`}
-                >
-                  {panel.title}
+                <span className="grid size-12 flex-none place-items-center rounded-full border border-[#ecedf3] bg-white/70 text-[#002fa7] md:size-16">
+                  <Icon aria-hidden="true" size={24} strokeWidth={1.7} />
                 </span>
-                <span
-                  aria-hidden="true"
-                  className={`grid size-[34px] place-items-center rounded-[9px] border-[1.5px] border-[#e4e5ec] text-[18px] text-[#0f1d6e] transition-colors group-hover:bg-[#002fa7] group-hover:text-white group-hover:border-[#002fa7] max-[1000px]:group-hover:bg-transparent max-[1000px]:group-hover:text-[#0f1d6e] max-[1000px]:group-hover:border-[#e4e5ec]`}
-                >
-                  +
-                </span>
-              </div>
-
-              {/* Revealed content. */}
-              <div className={BODY_PANEL}>
-                <div
-                  data-mps-copy
-                  className="max-h-[220px] overflow-hidden transition-[opacity,transform,max-height] duration-500 group-[.full]:max-h-0 group-[.full]:translate-y-[-14px] group-[.full]:opacity-0 max-[1000px]:max-h-none"
-                >
-                  <h3 className="max-w-[20ch] text-[clamp(26px,3vw,36px)] font-bold leading-[1.12] tracking-[-0.03em] text-[#0f1d6e] max-[1000px]:max-w-none max-[1000px]:text-[26px]">
+                <span className="max-w-[68ch]">
+                  <span className="block text-[clamp(16px,2vw,24px)] font-semibold leading-[1.35] text-[#001f6e]">
                     {panel.title}
-                  </h3>
-                  <p className="mt-3 max-w-[46ch] text-[17px] leading-[1.5] text-[#6b7280] max-[1000px]:text-[16px]">
+                  </span>
+                  <span className="mt-1 block text-[clamp(12px,1.5vw,18px)] leading-[1.5] text-[#808080]">
                     {panel.desc}
-                  </p>
-                </div>
+                  </span>
+                </span>
+              </Button>
 
-                <div className={`${SCENE} ${panel.kind === "tiles" ? TILE_SCENE : ""}`}>
-                  {panel.kind === "chat" && (
-                    <div className="flex h-full gap-5">
-                      <div className={FRAME}>
-                        <div data-loop className={SCROLL_STACK}>
-                          <div className="mx-3 mt-2.5 rounded-[10px] bg-[#002fa7] px-3.5 py-2.5 text-[14px] font-semibold leading-[1.35] text-white">
-                            <small className="mb-0.5 block font-[JetBrains_Mono] text-[10px] font-semibold tracking-[0.1em] uppercase opacity-75">
-                              Treasurer · 9:02
-                            </small>
-                            Dues of ₦25,000 are due Friday
-                          </div>
-                          <Shot id="glass/problem/chat-group" alt="Busy group chat" width={600} />
-                        </div>
-                      </div>
-                      <div
-                        className={`min-w-0 flex-1 pt-1.5 @max-[520px]:hidden ${on ? "animate-[var(--animate-mps-enter)] [animation-delay:1s]" : ""}`}
-                      >
-                        <small className={MONO_KICKER}>Your reminder</small>
-                        <Reel
-                          items={REMINDER_FATE}
-                          className={`mt-2 h-[1.3em] ${REEL_TEXT}`}
-                          animated={on && playing}
-                        />
-                        <small className={`mt-4 block ${MONO_KICKER} text-[#ef4444]`}>
-                          Result: payment overdue
-                        </small>
-                      </div>
-                    </div>
-                  )}
-
-                  {panel.kind === "tiles" && (
-                    <div className="h-full">
-                      <div
-                        className={`relative flex h-full w-full gap-3 ${on ? "animate-[var(--animate-mps-enter)] [animation-delay:500ms]" : ""}`}
-                      >
-                        <span
-                          className={`absolute top-2.5 right-2.5 z-2 rounded-full bg-[#002fa7] px-3 py-1.5 font-[JetBrains_Mono] text-[12px] font-semibold text-white transition-opacity duration-400 group-[.full]:opacity-100 max-[1000px]:top-1.5 max-[1000px]:right-1.5 max-[1000px]:px-2 max-[1000px]:py-0.5 max-[1000px]:text-[10px] ${on ? "opacity-100" : "opacity-0"}`}
-                        >
-                          App switch {(step % TILES.length) + 1} / 3
-                        </span>
-                        {TILES.map((tile, t) => {
-                          const tileActive = on && playing && t === step % TILES.length;
-                          return (
-                            <div
-                              key={tile.id}
-                              className={`${TILE} ${tileActive ? TILE_ACTIVE : ""} ${tileActive ? "" : "max-[1000px]:hidden"}`}
-                            >
-                              <Shot
-                                id={tile.id}
-                                alt={tile.alt}
-                                position={tile.position}
-                                width={400}
-                              />
-                              <span className="absolute inset-x-0 bottom-0 overflow-hidden bg-[linear-gradient(transparent,#0c1020d0)] px-3 pt-[26px] pb-2.5 text-[13px] font-semibold whitespace-nowrap text-white max-[1000px]:px-2 max-[1000px]:text-[11px]">
-                                {tile.caption}
-                              </span>
+              <div className="relative isolate aspect-[1215/587] min-h-[280px] w-full overflow-hidden rounded-[8px] border border-black/10 max-[1000px]:min-h-[240px] max-[560px]:min-h-[220px]">
+                <ProblemStoryBackdrop className="absolute inset-0" />
+                <div className="relative z-10 h-full w-full">
+                  <div className={`${SCENE} ${panel.kind === "tiles" ? TILE_SCENE : ""}`}>
+                    {panel.kind === "chat" && (
+                      <div className="flex h-full gap-5">
+                        <div className={FRAME}>
+                          <div data-loop className={SCROLL_STACK}>
+                            <div className="mx-3 mt-2.5 rounded-[10px] bg-[#002fa7] px-3.5 py-2.5 text-[14px] font-semibold leading-[1.35] text-white">
+                              <small className="mb-0.5 block font-[JetBrains_Mono] text-[10px] font-semibold tracking-[0.1em] uppercase opacity-75">
+                                Treasurer · 9:02
+                              </small>
+                              Dues of ₦25,000 are due Friday
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {panel.kind === "receipts" && (
-                    <div className="flex h-full gap-5">
-                      <div className={FRAME}>
-                        <div data-loop className={`${SCROLL_STACK} [animation-duration:12s]`}>
-                          {RECEIPTS.map((id) => (
-                            <Shot key={id} id={id} alt="Payment receipt" width={600} />
-                          ))}
+                            <Shot id="glass/problem/chat-group" alt="Busy group chat" width={600} />
+                          </div>
+                        </div>
+                        <div
+                          className={`min-w-0 flex-1 pt-1.5 ${on ? "animate-[var(--animate-mps-enter)] [animation-delay:1s]" : ""}`}
+                        >
+                          <small className={MONO_KICKER}>Your reminder</small>
+                          <Reel
+                            items={REMINDER_FATE}
+                            className={`mt-2 h-[1.3em] ${REEL_TEXT}`}
+                            animated={on && playing}
+                          />
+                          <small className={`mt-4 block ${MONO_KICKER} text-[#ef4444]`}>
+                            Result: payment overdue
+                          </small>
                         </div>
                       </div>
-                      <div
-                        className={`min-w-0 flex-1 pt-1.5 @max-[520px]:hidden ${on ? "animate-[var(--animate-mps-enter)] [animation-delay:1s]" : ""}`}
-                      >
-                        <small className={MONO_KICKER}>Searching: March proof</small>
-                        <Reel
-                          items={PROOF_DATES}
-                          className={`mt-2 h-[2.6em] ${REEL_TEXT}`}
-                          animated={on && playing}
-                        />
-                        <small className={`mt-3 block ${MONO_KICKER} text-[#ef4444]`}>
-                          Still scrolling · no match
-                        </small>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                    )}
 
-                {/* Story progress bar. */}
-                <i
-                  data-loop
-                  aria-hidden="true"
-                  className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-[linear-gradient(90deg,#002FA7,#002fa7,#6b2fb5)] group-[.on]:animate-[var(--animate-mps-progress)]"
-                />
+                    {panel.kind === "tiles" && (
+                      <div className="h-full">
+                        <div
+                          className={`relative flex h-full w-full gap-3 ${on ? "animate-[var(--animate-mps-enter)] [animation-delay:500ms]" : ""}`}
+                        >
+                          <span
+                            className={`absolute top-2.5 right-2.5 z-2 rounded-full bg-[#002fa7] px-3 py-1.5 font-[JetBrains_Mono] text-[12px] font-semibold text-white transition-opacity duration-400 group-[.full]:opacity-100 max-[1000px]:top-1.5 max-[1000px]:right-1.5 max-[1000px]:px-2 max-[1000px]:py-0.5 max-[1000px]:text-[10px] ${on ? "opacity-100" : "opacity-0"}`}
+                            >
+                            App switch {(step % TILES.length) + 1} / 3
+                          </span>
+                          {TILES.map((tile, t) => {
+                            const tileActive =
+                              on && (reduceMotion ? t === 0 : playing && t === step % TILES.length);
+                            return (
+                              <div
+                                key={tile.id}
+                                className={`${TILE} ${tileActive ? TILE_ACTIVE : ""} ${tileActive ? "" : "max-[1000px]:hidden"}`}
+                              >
+                                <Shot
+                                  id={tile.id}
+                                  alt={tile.alt}
+                                  position={tile.position}
+                                  width={400}
+                                />
+                                <span className="absolute inset-x-0 bottom-0 overflow-hidden bg-[linear-gradient(transparent,#0c1020d0)] px-3 pt-[26px] pb-2.5 text-[13px] font-semibold whitespace-nowrap text-white max-[1000px]:px-2 max-[1000px]:text-[11px]">
+                                  {tile.caption}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {panel.kind === "receipts" && (
+                      <div className="flex h-full gap-5">
+                        <div className={FRAME}>
+                          <div data-loop className={`${SCROLL_STACK} [animation-duration:12s]`}>
+                            {RECEIPTS.map((id) => (
+                              <Shot key={id} id={id} alt="Payment receipt" width={600} />
+                            ))}
+                          </div>
+                        </div>
+                        <div
+                          className={`min-w-0 flex-1 pt-1.5 ${on ? "animate-[var(--animate-mps-enter)] [animation-delay:1s]" : ""}`}
+                        >
+                          <small className={MONO_KICKER}>Searching: March proof</small>
+                          <Reel
+                            items={PROOF_DATES}
+                            className={`mt-2 h-[2.6em] ${REEL_TEXT}`}
+                            animated={on && playing}
+                          />
+                          <small className={`mt-3 block ${MONO_KICKER} text-[#ef4444]`}>
+                            Still scrolling · no match
+                          </small>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <i
+                    data-loop
+                    aria-hidden="true"
+                    className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-[linear-gradient(90deg,#002FA7,#002fa7,#6b2fb5)] group-[.on]:animate-[var(--animate-mps-progress)]"
+                  />
+                </div>
               </div>
             </article>
           );

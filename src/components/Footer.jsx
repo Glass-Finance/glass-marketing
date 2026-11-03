@@ -111,7 +111,7 @@ export default function Footer() {
             onClick={() => goToApp("/sign-up", navigate)}
             className="shadow-lg shadow-black/20"
           >
-            Get Started Free
+            Get Started
           </LandingCta>
         </div>
       </div>
