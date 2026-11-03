@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronRight, Menu, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { goToApp } from "../utils/deviceRedirect";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "motion/react";
@@ -17,6 +17,21 @@ const glassLogo = {
   src: cldUrl("glass/Glass", { width: 30 }),
   srcSet: cldSrcSet("glass/Glass", [30, 60, 90]),
 };
+
+const organizationNavItems = [
+  { label: "Use Cases", id: "use-cases", dropdown: true },
+  { label: "About Us", id: "solution" },
+  { label: "Contact", href: "mailto:glasspayhq@gmail.com" },
+  {
+    label: "Ambassadors",
+    href: "mailto:glasspayhq@gmail.com?subject=Glass%20Ambassador%20Program",
+  },
+];
+
+const memberNavItems = [
+  { label: "Use Cases", id: "use-cases" },
+  { label: "How It Works", id: "how-it-works" },
+];
 
 // Single source of truth for the Organizations/Members switch — previously
 // this existed as two separately-styled implementations (a gray rounded-md
@@ -67,6 +82,12 @@ export default function Navbar() {
   });
 
   const viewMode = location.pathname === "/members" ? "members" : "organizations";
+  const navItems = viewMode === "organizations" ? organizationNavItems : memberNavItems;
+
+  const handleNavClick = (id) => {
+    scrollTo(id);
+    setMenuOpen(false);
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -157,37 +178,46 @@ export default function Navbar() {
             </div>
 
             <div className="hidden lg:flex items-center gap-7">
-              <button
-                onClick={() => scrollTo("use-cases")}
-                className="text-[13.5px] text-white hover:text-white/55 transition-colors font-medium cursor-pointer"
-              >
-                Use Cases
-              </button>
-              <button
-                onClick={() => scrollTo("how-it-works")}
-                className="text-[13.5px] text-white hover:text-white/55 transition-colors font-medium cursor-pointer"
-              >
-                How It Works
-              </button>
+              {navItems.map(({ label, id, href, dropdown }) =>
+                href ? (
+                  <a
+                    key={label}
+                    href={href}
+                    className="text-[13.5px] font-medium text-white no-underline transition-colors hover:text-white/55"
+                  >
+                    {label}
+                  </a>
+                ) : (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => handleNavClick(id)}
+                    className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-white transition-colors hover:text-white/55"
+                  >
+                    {label}
+                    {dropdown ? <ChevronDown aria-hidden="true" size={13} /> : null}
+                  </button>
+                ),
+              )}
             </div>
 
             <div className="hidden lg:flex items-center gap-3 shrink-0">
               {viewMode === "organizations" ? (
                 <>
+                  <LandingCta
+                    onClick={() => goToApp("/sign-up", navigate)}
+                    compact
+                    className="shadow-lg shadow-black/20"
+                  >
+                    Get Started
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </LandingCta>
                   <button
                     onClick={() => goToApp("/sign-in", navigate)}
                     className="text-[13.5px] text-white/85 hover:text-white transition-colors font-medium px-5 py-2.5 rounded-full border border-white/[0.15] hover:border-white/[0.25] hover:bg-white/[0.05] cursor-pointer"
                   >
                     Sign In
                   </button>
-                  <LandingCta
-                    onClick={() => goToApp("/sign-up", navigate)}
-                    compact
-                    className="shadow-lg shadow-black/20"
-                  >
-                    Get Started Free
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </LandingCta>
                 </>
               ) : (
                 <LandingCta
@@ -260,21 +290,26 @@ export default function Navbar() {
                   </div>
 
                   <div className="space-y-1 pt-1">
-                    {[
-                      { label: "Use Cases", id: "use-cases" },
-                      { label: "How It Works", id: "how-it-works" },
-                    ].map(({ label, id }) => (
-                      <button
-                        key={label}
-                        onClick={() => {
-                          scrollTo(id);
-                          setMenuOpen(false);
-                        }}
-                        className="flex items-center justify-between w-full py-3 text-[14px] font-medium text-white/60 hover:text-white transition-colors border-b border-white/[0.05]"
-                      >
-                        {label}
-                      </button>
-                    ))}
+                    {navItems.map(({ label, id, href }) =>
+                      href ? (
+                        <a
+                          key={label}
+                          href={href}
+                          onClick={() => setMenuOpen(false)}
+                          className="flex w-full items-center justify-between border-b border-white/[0.05] py-3 text-[14px] font-medium text-white/60 no-underline transition-colors hover:text-white"
+                        >
+                          {label}
+                        </a>
+                      ) : (
+                        <button
+                          key={label}
+                          onClick={() => handleNavClick(id)}
+                          className="flex w-full items-center justify-between border-b border-white/[0.05] py-3 text-[14px] font-medium text-white/60 transition-colors hover:text-white"
+                        >
+                          {label}
+                        </button>
+                      ),
+                    )}
                   </div>
 
                   {viewMode === "organizations" ? (
@@ -286,7 +321,7 @@ export default function Navbar() {
                         }}
                         compact
                       >
-                        Get Started Free <ChevronRight className="w-4 h-4" />
+                        Get Started <ChevronRight className="w-4 h-4" />
                       </LandingCta>
                       <button
                         onClick={() => {

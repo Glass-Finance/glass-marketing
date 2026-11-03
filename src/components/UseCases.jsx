@@ -400,20 +400,22 @@ export default function UseCases() {
                 </motion.div>
               </AnimatePresence>
             </div>
-            <Button
-              onClick={() => goToApp("/sign-up", navigate)}
-              fullWidth={false}
-              variant="outline"
-              size="sm"
-              className="inline-flex shrink-0 items-center gap-1.5"
-            >
-              Get started
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
           </div>
           {STRIP_W.map((w) => (
             <div key={w} aria-hidden className="hidden md:block shrink-0" style={{ width: w }} />
           ))}
+        </div>
+        <div className={`${enter} mt-10 flex justify-center`} style={{ animationDelay: "180ms" }}>
+          <Button
+            onClick={() => goToApp("/sign-up", navigate)}
+            fullWidth={false}
+            variant="primary"
+            size="md"
+            className="inline-flex items-center gap-2"
+          >
+            Get started
+            <ArrowRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </section>

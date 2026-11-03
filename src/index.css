@@ -370,6 +370,21 @@ section {
    and progress bars need per-instance duration overrides and fill modes
    that a fixed theme token can't carry. */
 
+.problem-story-backdrop {
+  overflow: hidden;
+  background: linear-gradient(125deg, #e4e6f4 0%, #efe8f4 54%, #e4dff2 100%);
+}
+
+.problem-story-backdrop__art {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  max-width: none;
+}
+
 @keyframes mps-progress {
   to {
     transform: scaleX(1);
@@ -484,17 +499,6 @@ section {
   }
   [data-role="stage"][data-scene="3"] {
     min-height: 280px;
-  }
-}
-
-/* Organizations section: slow drift on the decorative logo marks. */
-@keyframes gps-drift {
-  0%,
-  100% {
-    transform: rotate(var(--r, 0deg)) translate3d(0, 0, 0);
-  }
-  50% {
-    transform: rotate(var(--r, 0deg)) translate3d(0, -12px, 0);
   }
 }
 
