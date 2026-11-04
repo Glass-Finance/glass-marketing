@@ -5,6 +5,7 @@ import RecentActivityPanel from "./RecentActivityPanel";
 function PayDuesBanner() {
   return (
     <div
+      className="dashboard-due-banner"
       style={{
         display: "flex",
         alignItems: "center",
@@ -68,6 +69,7 @@ export default function DashboardScreen() {
     <>
       <div
         id="dbo-e0"
+        className="dashboard-tour-header"
         style={{
           opacity: 0,
           transform: "translateY(10px)",
@@ -84,7 +86,7 @@ export default function DashboardScreen() {
             A full picture of your community's financial activity.
           </div>
         </div>
-        <div style={{ display: "flex", gap: 7 }}>
+        <div className="dashboard-tour-actions" style={{ display: "flex", gap: 7 }}>
           <button
             tabIndex={-1}
             aria-hidden="true"
@@ -122,7 +124,10 @@ export default function DashboardScreen() {
 
       <StatsRow />
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      <div
+        className="dashboard-home-panels"
+        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
+      >
         <PaymentPlansPanel />
         <RecentActivityPanel />
       </div>

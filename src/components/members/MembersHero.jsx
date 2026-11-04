@@ -150,6 +150,7 @@ export default function MembersHero() {
               }}
             >
               <LandingCta
+                radius="sm"
                 onClick={handleJoin}
                 loading={isRedirecting}
                 className="shadow-lg shadow-black/30"
@@ -224,6 +225,7 @@ export default function MembersHero() {
               history, and never miss a deadline again.
             </p>
             <LandingCta
+              radius="sm"
               onClick={handleJoin}
               loading={isRedirecting}
               className="shadow-lg shadow-black/30"
