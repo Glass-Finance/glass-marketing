@@ -219,10 +219,7 @@ export default function DashboardOverlay() {
   const F = { fontFamily: "Inter,-apple-system,sans-serif" };
 
   return (
-    <div
-      className="dashboard-overlay"
-      style={{ position: "relative", width: "100%", ...F }}
-    >
+    <div className="dashboard-overlay" style={{ position: "relative", width: "100%", ...F }}>
       <style>{`
         .dashboard-frame { padding: 14px 14px 0; border-radius: 16px; }
         .dashboard-window { min-height: 480px; }

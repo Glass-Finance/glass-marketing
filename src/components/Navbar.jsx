@@ -183,7 +183,7 @@ export default function Navbar() {
             </div>
 
             <div className="hidden lg:flex items-center gap-7">
-              {navItems.map(({ label, id, href, dropdown }) =>
+              {navItems.map(({ label, id, href }) =>
                 href ? (
                   <a
                     key={label}
