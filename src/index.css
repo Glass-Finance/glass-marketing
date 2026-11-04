@@ -511,8 +511,8 @@ section {
    Kept in sync with glass-waitlist's index.css — same Crisp website ID on
    both properties, so the landing and the app must render the same
    launcher. Per design: a compact 30px launcher whose 16px white bubble
-   glyph (public/crisp-launcher-glyph.svg) sits on the icon-spec blue
-   (#2563EB). The Glass logo is not part of the widget at all: CrispChat's
+   glyph (public/crisp-launcher-glyph.svg) sits on the Glass brand blue
+   (#002fa7). The Glass logo is not part of the widget at all: CrispChat's
    observer permanently strips the dashboard-set website avatar from the
    DOM (it is re-injected on every open/close repaint, so CSS hiding alone
    always reverts) — the glyph is the only icon that ever renders.
@@ -536,7 +536,7 @@ section {
    both identities and the icon can never revert to Crisp's default. */
 #crisp-chatbox > div > div[role="button"] span[data-id="chat_closed"],
 #crisp-chatbox > div > div[role="button"] span[data-id="chat_opened"] {
-  background-color: #2563eb !important;
+  background-color: #002fa7 !important;
   background-image: url("/crisp-launcher-glyph.svg") !important;
   background-size: 16px 16px !important;
   background-position: center !important;
