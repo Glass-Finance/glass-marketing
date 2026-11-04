@@ -99,13 +99,10 @@ export default class ErrorBoundary extends Component {
           </p>
 
           <div className="flex gap-3">
-            <a
-              href="/"
-              className="px-5 py-2.5 rounded-full text-[13px] font-medium text-gray-700 no-underline cursor-pointer transition-colors bg-[#FFFFFF99] border border-[#E5E7EB] backdrop-blur-[4px]"
-            >
+            <Button onClick={() => window.location.assign("/")} size="md" fullWidth={false}>
               Go home
-            </a>
-            <Button onClick={() => window.location.reload()} size="md">
+            </Button>
+            <Button onClick={() => window.location.reload()} size="md" fullWidth={false}>
               Refresh page
             </Button>
           </div>

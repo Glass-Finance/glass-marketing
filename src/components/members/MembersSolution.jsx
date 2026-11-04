@@ -3,7 +3,6 @@ import SolutionSection from "../common/SolutionSection";
 
 const ICON_WIDTHS = [50, 100, 150];
 const ILLUS_WIDTHS = [400, 800, 1200, 1600];
-
 const icon1 = {
   src: cldUrl("glass/icon/frame1", { width: 100 }),
   srcSet: cldSrcSet("glass/icon/frame1", ICON_WIDTHS),
@@ -21,20 +20,20 @@ const icon4 = {
   srcSet: cldSrcSet("glass/icon/frame4", ICON_WIDTHS),
 };
 const featurePayment = {
-  src: cldUrl("glass/solution/payment", { width: 800 }),
-  srcSet: cldSrcSet("glass/solution/payment", ILLUS_WIDTHS),
+  src: cldUrl("glass/solution/payment", { width: 800, format: "svg" }),
+  srcSet: cldSrcSet("glass/solution/payment", ILLUS_WIDTHS, { format: "svg" }),
 };
 const featureReminder = {
-  src: cldUrl("glass/solution/reminder", { width: 800 }),
-  srcSet: cldSrcSet("glass/solution/reminder", ILLUS_WIDTHS),
+  src: cldUrl("glass/solution/reminder", { width: 800, format: "svg" }),
+  srcSet: cldSrcSet("glass/solution/reminder", ILLUS_WIDTHS, { format: "svg" }),
+};
+const featureHistory = {
+  src: cldUrl("glass/solution/payment-history", { width: 800, format: "svg" }),
+  srcSet: cldSrcSet("glass/solution/payment-history", ILLUS_WIDTHS, { format: "svg" }),
 };
 const featureInstant = {
-  src: cldUrl("glass/solution/instant", { width: 800 }),
-  srcSet: cldSrcSet("glass/solution/instant", ILLUS_WIDTHS),
-};
-const featureFlexible = {
-  src: cldUrl("glass/solution/flexible", { width: 800 }),
-  srcSet: cldSrcSet("glass/solution/flexible", ILLUS_WIDTHS),
+  src: cldUrl("glass/solution/instant", { width: 800, format: "svg" }),
+  srcSet: cldSrcSet("glass/solution/instant", ILLUS_WIDTHS, { format: "svg" }),
 };
 
 const features = [
@@ -43,6 +42,7 @@ const features = [
     title: "One-Click Payments",
     desc: "Pay your dues in seconds from any device. No more manual transfers.",
     illustration: featurePayment,
+    illustrationBackground: true,
   },
   {
     icon: icon1,
@@ -52,15 +52,15 @@ const features = [
   },
   {
     icon: icon3,
-    title: "Generate Instant Proof",
-    desc: "View your full history and download official receipts immediately after paying.",
-    illustration: featureInstant,
+    title: "Easy Access To Your Payment History",
+    desc: "Easily track past payments.",
+    illustration: featureHistory,
   },
   {
     icon: icon4,
-    title: "Flexible Options",
-    desc: "Pay exactly how you want — via Card, Bank Transfer, or USSD.",
-    illustration: featureFlexible,
+    title: "Generate Instant Proof",
+    desc: "Download official receipts immediately after paying.",
+    illustration: featureInstant,
   },
 ];
 

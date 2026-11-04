@@ -158,7 +158,7 @@ export default function WhyGlass() {
           <a
             ref={btnRef}
             href="mailto:glasspayhq@gmail.com"
-            className="inline-flex items-center gap-2.5 bg-[#002FA7] text-white font-semibold text-[15px] px-7 py-3.5 rounded-full no-underline shadow-lg shadow-[#002FA7]/25 transition-[background,transform,box-shadow] duration-200 ease-in-out hover:opacity-90 hover:-translate-y-[3px] hover:shadow-[0_10px_28px_rgba(0,47,167,0.35)]"
+            className="inline-flex items-center gap-2.5 rounded-sm bg-[#002FA7] px-7 py-3.5 text-[15px] font-semibold text-white no-underline shadow-lg shadow-[#002FA7]/25 transition-[background,transform,box-shadow] duration-200 ease-in-out hover:opacity-90 hover:-translate-y-[3px] hover:shadow-[0_10px_28px_rgba(0,47,167,0.35)]"
           >
             Ask A Question
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">

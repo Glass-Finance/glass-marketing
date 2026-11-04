@@ -19,8 +19,8 @@
  */
 
 import { useEffect, useRef } from "react";
+import { Clock3, Eye } from "lucide-react";
 import { cldUrl } from "../../lib/cloudinary";
-import { Button } from "../ui/Button";
 import ProblemStoryBackdrop from "../ProblemStoryBackdrop";
 
 /**
@@ -158,7 +158,6 @@ const RECEIPT_SCREENSHOT = `
 
 export default function ProblemSection() {
   const rootRef = useRef(null);
-  const restartRef = useRef(() => {});
 
   useEffect(() => {
     const root = rootRef.current;
@@ -369,7 +368,6 @@ export default function ProblemSection() {
         });
 
       try {
-        $("verdict").classList.remove("on");
         for (let i = index; i < SCENES.length; i++) {
           $$("scene").forEach((s, k) => s.classList.toggle("on", k === i));
           // Marks the stage so its height can follow the active scene's content
@@ -382,7 +380,6 @@ export default function ProblemSection() {
           await SCENES[i](wait);
           if (i < SCENES.length - 1) await wait(500);
         }
-        $("verdict").classList.add("on");
         await wait(5000);
         play(0);
       } catch {
@@ -430,8 +427,6 @@ export default function ProblemSection() {
 
     fit();
     window.addEventListener("resize", fit);
-    restartRef.current = (index = 0) => play(index);
-
     let started = false;
     if ("IntersectionObserver" in window) {
       observer = new IntersectionObserver(
@@ -463,41 +458,50 @@ export default function ProblemSection() {
     >
       <div className="mx-auto max-w-[1200px]">
         {/* ── Header ── */}
-        <header className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] items-end gap-x-16 gap-y-6 max-[1040px]:grid-cols-1 max-[1040px]:items-start">
-          <div>
-            <div className="inline-flex items-center rounded-full border border-brand-deep/25 px-5 py-2 text-[13px] font-medium text-brand-deep">
-              The Problem
-            </div>
-            <h2 className="mt-[18px] max-w-[20ch] text-[clamp(26px,5vw,58px)] font-bold leading-[1.15] tracking-[-0.02em] text-balance text-brand-ink">
-              Still spending weekends chasing payments?
-            </h2>
+        <header className="mx-auto max-w-[900px] text-center">
+          <div className="inline-flex items-center rounded-full border border-brand-deep/25 px-5 py-2 text-[13px] font-medium text-brand-deep">
+            The Problem
           </div>
-          <p className="m-0 max-w-[34ch] text-[clamp(15px,2vw,17px)] leading-[1.45]">
+          <h2 className="mt-[18px] w-full text-center font-[Inter,sans-serif] text-[clamp(32px,3.89vw,56px)] leading-normal font-bold text-brand-navy">
+            Still spending weekends chasing payments?
+          </h2>
+          <p className="mx-auto mt-4 max-w-[56ch] text-[clamp(15px,2vw,17px)] leading-[1.7]">
             Without centralized visibility, time is wasted and trust begins to weaken.
           </p>
         </header>
 
-        {/* ── Story controls ── */}
-        <div className="mt-14 flex flex-wrap items-center justify-between gap-x-6 gap-y-2.5">
-          <h3 className="m-0 text-[clamp(1.15rem,2vw,1.4rem)] font-semibold tracking-[-0.02em] text-[#0f1d6e]">
-            One ₦25,000 dues payment, followed from Friday to Sunday
-          </h3>
-          <div className="flex items-center gap-3.5 text-[12px]">
-            <span>Sample data</span>
-            <Button
-              variant="outline-neutral"
-              size="sm"
-              fullWidth={false}
-              type="button"
-              onClick={() => restartRef.current(0)}
-            >
-              ↻ Replay
-            </Button>
-          </div>
+        <div className="mt-10 grid gap-8 md:grid-cols-2 md:gap-12">
+          <article className="flex items-start gap-4">
+            <span className="grid size-12 flex-none place-items-center rounded-full border border-[#ecedf3] bg-white/70 text-[#002fa7] md:size-16">
+              <Clock3 aria-hidden="true" size={24} strokeWidth={1.7} />
+            </span>
+            <div>
+              <h3 className="text-[clamp(16px,2vw,24px)] font-semibold leading-[1.35] text-[#001f6e]">
+                How much time goes into tracking and confirming payments?
+              </h3>
+              <p className="mt-1 text-[clamp(12px,1.5vw,18px)] leading-[1.5] text-[#808080]">
+                Checking bank alerts and updating spreadsheets takes up valuable time every month.
+              </p>
+            </div>
+          </article>
+          <article className="flex items-start gap-4">
+            <span className="grid size-12 flex-none place-items-center rounded-full border border-[#ecedf3] bg-white/70 text-[#002fa7] md:size-16">
+              <Eye aria-hidden="true" size={24} strokeWidth={1.7} />
+            </span>
+            <div>
+              <h3 className="text-[clamp(16px,2vw,24px)] font-semibold leading-[1.35] text-[#001f6e]">
+                Ever struggled to confirm whether a payment was made?
+              </h3>
+              <p className="mt-1 text-[clamp(12px,1.5vw,18px)] leading-[1.5] text-[#808080]">
+                Without clear records, it&apos;s hard to know who paid, what for, and what&apos;s
+                outstanding.
+              </p>
+            </div>
+          </article>
         </div>
 
         {/* ── Player ── */}
-        <div data-role="player" className="mt-5">
+        <div data-role="player" className="mt-10">
           <div
             data-role="stage"
             className="relative isolate min-h-[640px] overflow-hidden rounded-[20px] border border-black/10 transition-[min-height] duration-500 max-[1040px]:min-h-[620px] max-[600px]:min-h-[620px]"
@@ -769,41 +773,6 @@ export default function ProblemSection() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* ── Verdict ── */}
-        <div
-          data-role="verdict"
-          className="mt-6 rounded-xl border border-[#e2e4ee] bg-white px-7 py-[22px] text-[clamp(1.1rem,2vw,1.4rem)] leading-[1.35] text-[#0f1d6e] [clip-path:inset(0_100%_0_0)] transition-[clip-path] duration-800 [&.on]:[clip-path:inset(0)]"
-        >
-          <b className="font-bold">Five places hold one payment.</b>{" "}
-          <span className="text-[#6b7280]">None of them is the record.</span>
-        </div>
-
-        {/* ── Time / Trust ── */}
-        <div className="mt-16 grid grid-cols-2 border-t border-[#e2e4ee] max-[1040px]:mt-12 max-[1040px]:grid-cols-1">
-          <div className="py-9 pr-12 pb-2">
-            <div className="text-[12px] font-semibold tracking-[0.14em] text-[#002fa7] uppercase">
-              Time
-            </div>
-            <h4 className="mt-3 max-w-[20ch] text-[clamp(1.45rem,2.5vw,1.85rem)] leading-[1.18] font-semibold tracking-[-0.025em] text-balance text-[#0f1d6e]">
-              How much time is your team losing to manual reconciliation?
-            </h4>
-            <p className="mt-3.5 max-w-[34ch]">
-              Bank alerts and spreadsheets consume hours every month.
-            </p>
-          </div>
-          <div className="border-l border-[#e2e4ee] py-9 pr-0 pb-2 pl-12 max-[1040px]:mt-5 max-[1040px]:border-t max-[1040px]:border-l-0 max-[1040px]:py-7 max-[1040px]:pr-0 max-[1040px]:pl-0">
-            <div className="text-[12px] font-semibold tracking-[0.14em] text-[#002fa7] uppercase">
-              Trust
-            </div>
-            <h4 className="mt-3 max-w-[20ch] text-[clamp(1.45rem,2.5vw,1.85rem)] leading-[1.18] font-semibold tracking-[-0.025em] text-balance text-[#0f1d6e]">
-              Can your members clearly see how funds are managed?
-            </h4>
-            <p className="mt-3.5 max-w-[34ch]">
-              Limited transparency reduces trust and slows compliance.
-            </p>
           </div>
         </div>
       </div>

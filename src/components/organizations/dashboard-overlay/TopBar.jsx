@@ -3,6 +3,7 @@
 export default function TopBar() {
   return (
     <div
+      className="dashboard-topbar"
       style={{
         background: "#fff",
         borderBottom: "1px solid #E0E0EB",
@@ -13,6 +14,7 @@ export default function TopBar() {
       }}
     >
       <div
+        className="dashboard-search"
         style={{
           display: "flex",
           alignItems: "center",

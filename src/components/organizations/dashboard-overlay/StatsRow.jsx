@@ -108,6 +108,7 @@ const STATS = [
 export default function StatsRow() {
   return (
     <div
+      className="dashboard-stat-row"
       style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 12 }}
     >
       {STATS.map((s) => (

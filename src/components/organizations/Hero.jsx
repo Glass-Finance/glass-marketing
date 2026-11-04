@@ -115,6 +115,7 @@ export default function Hero() {
           <Reveal variant="up" delay={240}>
             <div className="flex items-center justify-center gap-3 flex-wrap">
               <LandingCta
+                radius="sm"
                 onClick={() => goToApp("/sign-up", navigate)}
                 onMouseMove={(e) => {
                   const r = e.currentTarget.getBoundingClientRect();

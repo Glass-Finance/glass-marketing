@@ -123,6 +123,7 @@ const PLANS = [
 export default function PaymentsScreen({ active }) {
   return (
     <div
+      className="dashboard-tour-screen"
       style={{
         position: "absolute",
         inset: 0,
@@ -136,6 +137,7 @@ export default function PaymentsScreen({ active }) {
       }}
     >
       <div
+        className="dashboard-tour-header"
         style={{
           display: "flex",
           alignItems: "flex-start",
@@ -166,6 +168,7 @@ export default function PaymentsScreen({ active }) {
         </button>
       </div>
       <div
+        className="dashboard-tour-stats"
         style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 10 }}
       >
         {STATS.map((s) => (
@@ -229,7 +232,10 @@ export default function PaymentsScreen({ active }) {
           </span>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+      <div
+        className="dashboard-plan-grid"
+        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
+      >
         {PLANS.map((p, i) => {
           const s = STATUS[p.st];
           return (

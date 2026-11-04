@@ -121,6 +121,7 @@ const COLS = "22px 1.5fr 0.5fr 0.9fr 1.1fr 1.6fr 0.6fr";
 export default function MembersScreen({ active }) {
   return (
     <div
+      className="dashboard-tour-screen"
       style={{
         position: "absolute",
         inset: 0,
@@ -134,6 +135,7 @@ export default function MembersScreen({ active }) {
       }}
     >
       <div
+        className="dashboard-tour-header"
         style={{
           display: "flex",
           alignItems: "flex-start",
@@ -192,6 +194,7 @@ export default function MembersScreen({ active }) {
         </div>
       </div>
       <div
+        className="dashboard-tour-stats"
         style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 10 }}
       >
         {STATS.map((s) => (
@@ -212,6 +215,7 @@ export default function MembersScreen({ active }) {
               <div style={{ fontSize: 14, fontWeight: 700, color: "#000" }}>{s.value}</div>
             </div>
             <div
+              className="dashboard-members-table"
               style={{
                 width: 26,
                 height: 26,
@@ -229,6 +233,7 @@ export default function MembersScreen({ active }) {
         ))}
       </div>
       <div
+        className="dashboard-members-table-row"
         style={{
           background: "#fff",
           borderRadius: 12,
@@ -335,6 +340,7 @@ export default function MembersScreen({ active }) {
         {MEMBERS.map((m, i, arr) => (
           <div
             key={m.n}
+            className="dashboard-members-table-row"
             style={{
               display: "grid",
               gridTemplateColumns: COLS,
