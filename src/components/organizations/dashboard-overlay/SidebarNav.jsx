@@ -85,6 +85,7 @@ export default function SidebarNav({ nav }) {
 
   return (
     <div
+      className="dashboard-sidebar"
       style={{
         width: 180,
         background: "#fff",

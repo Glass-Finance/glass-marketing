@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronRight, Menu, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { goToApp } from "../utils/deviceRedirect";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "motion/react";
@@ -17,6 +17,26 @@ const glassLogo = {
   src: cldUrl("glass/Glass", { width: 30 }),
   srcSet: cldSrcSet("glass/Glass", [30, 60, 90]),
 };
+
+const organizationNavItems = [
+  { label: "Use Cases", id: "use-cases", dropdown: true },
+  { label: "About Us", id: "solution" },
+  { label: "Contact", href: "mailto:glasspayhq@gmail.com" },
+  {
+    label: "Ambassadors",
+    href: "mailto:glasspayhq@gmail.com?subject=Glass%20Ambassador%20Program",
+  },
+];
+
+const memberNavItems = [
+  { label: "Use Cases", id: "use-cases", dropdown: true },
+  { label: "About Us", id: "solution" },
+  { label: "Contact", href: "mailto:glasspayhq@gmail.com" },
+  {
+    label: "Ambassadors",
+    href: "mailto:glasspayhq@gmail.com?subject=Glass%20Ambassador%20Program",
+  },
+];
 
 // Single source of truth for the Organizations/Members switch — previously
 // this existed as two separately-styled implementations (a gray rounded-md
@@ -67,6 +87,12 @@ export default function Navbar() {
   });
 
   const viewMode = location.pathname === "/members" ? "members" : "organizations";
+  const navItems = viewMode === "organizations" ? organizationNavItems : memberNavItems;
+
+  const handleNavClick = (id) => {
+    scrollTo(id);
+    setMenuOpen(false);
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -120,15 +146,13 @@ export default function Navbar() {
             lighter sections without hiding what's behind it. The mobile
             menu lives inside this shell too — the pill grows into the panel
             instead of a second card opening under it — so the shell clips
-            to its corners and holds one radius (30px: full-round at
-            resting height, a card's corners once expanded); animating
-            rounded-full → a small radius wouldn't interpolate cleanly in
-            Tailwind v4. An open menu covers the whole panel, so it goes
+            to its corners. The collapsed shell uses the pill exception;
+            when expanded it uses the documented 16px radius. An open menu covers the whole panel, so it goes
             solid black — even at black/95 the white page behind it lifted
             the panel to gray and ghosted the copy through the links and
             buttons. ── */}
         <div
-          className={`mx-3 sm:mx-6 lg:mx-auto lg:w-fit max-w-[1280px] overflow-hidden rounded-[30px] transition-all duration-300 ${
+          className={`mx-3 sm:mx-6 lg:mx-auto lg:w-fit max-w-[1280px] overflow-hidden ${menuOpen ? "rounded-g-4" : "rounded-full"} transition-all duration-300 ${
             scrolled || menuOpen ? "shadow-[0_8px_32px_rgba(0,0,0,0.35)]" : "shadow-none"
           } ${menuOpen ? "bg-black" : scrolled ? "bg-black/80" : "bg-transparent"}`}
         >
@@ -157,47 +181,45 @@ export default function Navbar() {
             </div>
 
             <div className="hidden lg:flex items-center gap-7">
-              <button
-                onClick={() => scrollTo("use-cases")}
-                className="text-[13.5px] text-white hover:text-white/55 transition-colors font-medium cursor-pointer"
-              >
-                Use Cases
-              </button>
-              <button
-                onClick={() => scrollTo("how-it-works")}
-                className="text-[13.5px] text-white hover:text-white/55 transition-colors font-medium cursor-pointer"
-              >
-                How It Works
-              </button>
+              {navItems.map(({ label, id, href }) =>
+                href ? (
+                  <a
+                    key={label}
+                    href={href}
+                    className="text-[13.5px] font-medium text-white no-underline transition-colors hover:text-white/55"
+                  >
+                    {label}
+                  </a>
+                ) : (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => handleNavClick(id)}
+                    className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-white transition-colors hover:text-white/55"
+                  >
+                    {label}
+                  </button>
+                ),
+              )}
             </div>
 
             <div className="hidden lg:flex items-center gap-3 shrink-0">
-              {viewMode === "organizations" ? (
-                <>
-                  <button
-                    onClick={() => goToApp("/sign-in", navigate)}
-                    className="text-[13.5px] text-white/85 hover:text-white transition-colors font-medium px-5 py-2.5 rounded-full border border-white/[0.15] hover:border-white/[0.25] hover:bg-white/[0.05] cursor-pointer"
-                  >
-                    Sign In
-                  </button>
-                  <LandingCta
-                    onClick={() => goToApp("/sign-up", navigate)}
-                    compact
-                    className="shadow-lg shadow-black/20"
-                  >
-                    Get Started Free
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </LandingCta>
-                </>
-              ) : (
-                <LandingCta
-                  onClick={() => goToApp("/sign-in", navigate)}
-                  compact
-                  className="shadow-lg shadow-black/20"
-                >
-                  Sign In
-                </LandingCta>
-              )}
+              <LandingCta
+                onClick={() =>
+                  goToApp(viewMode === "organizations" ? "/sign-up" : "/member/join", navigate)
+                }
+                compact
+                radius="sm"
+                className="shadow-lg shadow-black/20"
+              >
+                Get Started
+              </LandingCta>
+              <button
+                onClick={() => goToApp("/sign-in", navigate)}
+                className="text-[13.5px] text-white/85 hover:text-white transition-colors font-medium px-5 py-2.5 rounded-sm border border-white/[0.15] hover:border-white/[0.25] hover:bg-white/[0.05] cursor-pointer"
+              >
+                Sign In
+              </button>
             </div>
 
             {/* ── < lg: compact toggle (tablet only, ≥640px) + circular
@@ -260,55 +282,52 @@ export default function Navbar() {
                   </div>
 
                   <div className="space-y-1 pt-1">
-                    {[
-                      { label: "Use Cases", id: "use-cases" },
-                      { label: "How It Works", id: "how-it-works" },
-                    ].map(({ label, id }) => (
-                      <button
-                        key={label}
-                        onClick={() => {
-                          scrollTo(id);
-                          setMenuOpen(false);
-                        }}
-                        className="flex items-center justify-between w-full py-3 text-[14px] font-medium text-white/60 hover:text-white transition-colors border-b border-white/[0.05]"
-                      >
-                        {label}
-                      </button>
-                    ))}
+                    {navItems.map(({ label, id, href }) =>
+                      href ? (
+                        <a
+                          key={label}
+                          href={href}
+                          onClick={() => setMenuOpen(false)}
+                          className="flex w-full items-center justify-between border-b border-white/[0.05] py-3 text-[14px] font-medium text-white/60 no-underline transition-colors hover:text-white"
+                        >
+                          {label}
+                        </a>
+                      ) : (
+                        <button
+                          key={label}
+                          onClick={() => handleNavClick(id)}
+                          className="flex w-full items-center justify-between border-b border-white/[0.05] py-3 text-[14px] font-medium text-white/60 transition-colors hover:text-white"
+                        >
+                          {label}
+                        </button>
+                      ),
+                    )}
                   </div>
 
-                  {viewMode === "organizations" ? (
-                    <div className="flex flex-col gap-3">
-                      <LandingCta
-                        onClick={() => {
-                          goToApp("/sign-up", navigate);
-                          setMenuOpen(false);
-                        }}
-                        compact
-                      >
-                        Get Started Free <ChevronRight className="w-4 h-4" />
-                      </LandingCta>
-                      <button
-                        onClick={() => {
-                          goToApp("/sign-in", navigate);
-                          setMenuOpen(false);
-                        }}
-                        className="w-full flex items-center justify-center gap-2 text-white/80 py-2.5 rounded-full border border-white/[0.15] text-[14px] font-medium cursor-pointer"
-                      >
-                        Sign In
-                      </button>
-                    </div>
-                  ) : (
+                  <div className="flex flex-col gap-3">
                     <LandingCta
+                      onClick={() => {
+                        goToApp(
+                          viewMode === "organizations" ? "/sign-up" : "/member/join",
+                          navigate,
+                        );
+                        setMenuOpen(false);
+                      }}
+                      compact
+                      radius="sm"
+                    >
+                      Get Started <ChevronRight className="w-4 h-4" />
+                    </LandingCta>
+                    <button
                       onClick={() => {
                         goToApp("/sign-in", navigate);
                         setMenuOpen(false);
                       }}
-                      compact
+                      className="w-full flex items-center justify-center gap-2 text-white/80 py-2.5 rounded-sm border border-white/[0.15] text-[14px] font-medium cursor-pointer"
                     >
                       Sign In
-                    </LandingCta>
-                  )}
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}

@@ -13,12 +13,6 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import BlurText from "../ui/BlurText";
-import { cldUrl, cldSrcSet } from "../../lib/cloudinary";
-
-const lightBg = {
-  src: cldUrl("glass/solution/bg-light", { width: 1200 }),
-  srcSet: cldSrcSet("glass/solution/bg-light", [600, 1200, 1800, 2400]),
-};
 
 // ─── Per-card tilt hook ───────────────────────────────────────────────────────
 function useTilt(strength = 14) {
@@ -106,7 +100,7 @@ function useTilt(strength = 14) {
 }
 
 // ─── Feature card ─────────────────────────────────────────────────────────────
-function FeatureCard({ icon, title, desc, illustration, illustrationScale = "85%", entryDelay }) {
+function FeatureCard({ icon, title, desc, illustration, illustrationBackground, entryDelay }) {
   const { cardRef, sheenRef, onMouseMove, onMouseEnter, onMouseLeave } = useTilt(14);
 
   return (
@@ -115,18 +109,18 @@ function FeatureCard({ icon, title, desc, illustration, illustrationScale = "85%
       onMouseMove={onMouseMove}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="relative rounded-[14px] bg-[#EFEFF1] shadow-[0_0_0_1px_rgba(255,255,255,0.75)_inset,0_2px_12px_rgba(28,43,138,0.07),0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col cursor-default will-change-transform [transform-style:preserve-3d] opacity-0"
+      className="relative flex min-h-[320px] w-full cursor-default flex-col gap-6 overflow-hidden rounded-[4px] border border-black/10 bg-[rgba(255,255,255,0.6)] p-6 shadow-[0_2px_12px_rgba(28,43,138,0.07)] will-change-transform [transform-style:preserve-3d] opacity-0 sm:min-h-[380px] sm:p-8 lg:min-h-[420px]"
       style={{
         animation: `glassCardIn 0.65s cubic-bezier(0.22,1,0.36,1) ${entryDelay}ms forwards`,
       }}
     >
       <div
         ref={sheenRef}
-        className="absolute inset-0 rounded-[14px] pointer-events-none z-20 transition-opacity duration-200 ease-in-out"
+        className="absolute inset-0 rounded-sm pointer-events-none z-20 transition-opacity duration-200 ease-in-out"
         style={{ opacity: 0 }}
       />
 
-      <div className="flex items-start gap-3 [padding:clamp(16px,3vw,28px)_clamp(14px,2.5vw,20px)_0px]">
+      <div className="flex min-h-[80px] items-start gap-3">
         <img
           src={icon.src}
           srcSet={icon.srcSet}
@@ -144,29 +138,24 @@ function FeatureCard({ icon, title, desc, illustration, illustrationScale = "85%
         </div>
       </div>
 
-      {/* Illustration box — sizes below are approximate: actual rendered
-          width = illustrationScale% of the card, which itself varies by
-          grid breakpoint. Treat as a reasonable default and eyeball once
-          live; tighten if it's noticeably picking the wrong srcSet entry. */}
-      <div className="solution-illus relative flex-1 [min-height:clamp(160px,45vw,240px)] overflow-hidden">
-        <img
-          src={lightBg.src}
-          srcSet={lightBg.srcSet}
-          sizes="(min-width: 768px) 570px, 100vw"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-30"
-          draggable={false}
-          loading="lazy"
-          decoding="async"
-        />
-        <div className="solution-fade absolute top-0 left-0 right-0 h-[18%] bg-[linear-gradient(to_bottom,#EFEFF1_0%,rgba(239,239,241,0.7)_55%,transparent_100%)] pointer-events-none z-[5]" />
+      <div
+        className="solution-illus relative -mb-6 h-[clamp(150px,42vw,190px)] w-full flex-none overflow-hidden rounded-sm sm:-mb-8 sm:h-[clamp(220px,32vw,300px)] lg:h-auto lg:min-h-[240px] lg:flex-1"
+        style={
+          illustrationBackground
+            ? {
+                backgroundColor: "#f8f8fb",
+                backgroundImage:
+                  "radial-gradient(ellipse at 24% 42%, rgba(191, 211, 255, 0.65), transparent 54%), radial-gradient(ellipse at 78% 38%, rgba(231, 207, 245, 0.72), transparent 56%)",
+              }
+            : undefined
+        }
+      >
         <img
           src={illustration.src}
           srcSet={illustration.srcSet}
-          sizes="(min-width: 768px) 480px, 320px"
+          sizes="(min-width: 768px) 540px, 100vw"
           alt={title}
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 h-auto object-contain z-10"
-          style={{ width: illustrationScale }}
+          className="absolute inset-0 h-full w-full object-contain object-bottom"
           draggable={false}
           loading="lazy"
           decoding="async"
@@ -191,14 +180,10 @@ export default function SolutionSection({
         from { opacity: 0; transform: perspective(900px) translateY(32px) rotateX(6deg); }
         to   { opacity: 1; transform: perspective(900px) translateY(0px) rotateX(0deg); }
       }
-      @media (min-width: 640px) and (max-width: 1023px) {
-        .solution-illus { min-height: 180px !important; }
-        .solution-fade { height: 8% !important; background: linear-gradient(to bottom, #EFEFF1 0%, transparent 100%) !important; }
-      }
     `}</style>
 
-      <section className="py-20 md:py-28 relative isolate" id="solution">
-        <div className="max-w-[1140px] mx-auto px-6 relative z-30">
+      <section className="relative isolate py-20 md:py-28" id="solution">
+        <div className="mx-auto max-w-[1247px] px-6 relative z-30">
           <div className="text-center mb-12">
             <div className="mb-5 flex justify-center">
               <span className="inline-flex items-center border border-[#1C2B8A]/25 text-[#1C2B8A] text-[13px] font-medium px-5 py-2 rounded-full">
@@ -225,15 +210,15 @@ export default function SolutionSection({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {features.map(({ icon, title, desc, illustration, illustrationScale }, i) => (
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {features.map(({ icon, title, desc, illustration, illustrationBackground }, i) => (
               <FeatureCard
                 key={title}
                 icon={icon}
                 title={title}
                 desc={desc}
                 illustration={illustration}
-                illustrationScale={illustrationScale}
+                illustrationBackground={illustrationBackground}
                 entryDelay={200 + i * 120}
               />
             ))}

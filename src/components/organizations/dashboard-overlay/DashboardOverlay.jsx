@@ -219,9 +219,55 @@ export default function DashboardOverlay() {
   const F = { fontFamily: "Inter,-apple-system,sans-serif" };
 
   return (
-    <div style={{ position: "relative", width: "100%", ...F }}>
+    <div className="dashboard-overlay" style={{ position: "relative", width: "100%", ...F }}>
+      <style>{`
+        .dashboard-frame { padding: 14px 14px 0; border-radius: 16px; }
+        .dashboard-window { min-height: 480px; }
+        .dashboard-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .dashboard-content { position: relative; flex: 1; min-height: 0; padding: 14px 16px 0; overflow: hidden; }
+        .dashboard-tour-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+        .dashboard-tour-actions { display: flex; gap: 7px; }
+        .dashboard-home-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .dashboard-stat-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+        .dashboard-tour-screen { position: absolute; inset: 0; overflow: hidden; }
+        .dashboard-tour-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+        .dashboard-plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .dashboard-members-table { min-width: 0; }
+        .dashboard-members-table-row { grid-template-columns: minmax(22px, .15fr) minmax(90px, 1.5fr) minmax(35px, .5fr) minmax(65px, .9fr) minmax(78px, 1.1fr) minmax(110px, 1.6fr) minmax(18px, .25fr) !important; }
+        .dashboard-toast { right: -30px; }
+        @media (max-width: 850px) {
+          .dashboard-overlay .dashboard-frame { padding: 8px 8px 0 !important; border-radius: 12px !important; }
+          .dashboard-overlay .dashboard-window { min-height: 0 !important; flex-direction: column; }
+          .dashboard-overlay .dashboard-nav-rail,
+          .dashboard-overlay .dashboard-sidebar,
+          .dashboard-overlay .dashboard-tour-cursor,
+          .dashboard-overlay .dashboard-toast { display: none !important; }
+          .dashboard-overlay .dashboard-main { width: 100%; }
+          .dashboard-overlay .dashboard-topbar { padding: 8px 10px !important; gap: 8px; }
+          .dashboard-overlay .dashboard-search { min-width: 0; padding: 6px 8px !important; }
+          .dashboard-overlay .dashboard-search span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+          .dashboard-overlay .dashboard-content { flex: none; height: 860px; padding: 10px 8px 0 !important; overflow: hidden !important; }
+          .dashboard-overlay .dashboard-tour-header { flex-direction: column; gap: 8px; }
+          .dashboard-overlay .dashboard-tour-actions { flex-wrap: wrap; }
+          .dashboard-overlay .dashboard-due-banner { align-items: flex-start !important; flex-wrap: wrap; padding: 10px !important; }
+          .dashboard-overlay .dashboard-due-banner > div:last-child { margin-left: auto; }
+          .dashboard-overlay .dashboard-home-panels { grid-template-columns: minmax(0, 1fr) !important; }
+          .dashboard-overlay .dashboard-stat-row,
+          .dashboard-overlay .dashboard-tour-stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+          .dashboard-overlay .dashboard-tour-screen { overflow-y: auto !important; padding: 10px 8px 0 !important; }
+          .dashboard-overlay .dashboard-plan-grid { grid-template-columns: minmax(0, 1fr); }
+          .dashboard-overlay .dashboard-tour-screen > div:first-child button { max-width: 100%; }
+          .dashboard-overlay .dashboard-members-table { overflow-x: auto; }
+          .dashboard-overlay .dashboard-members-table-row { min-width: 520px; }
+        }
+        @media (max-width: 600px) {
+          .dashboard-overlay .dashboard-content { height: 700px; }
+          .dashboard-overlay .dashboard-home-panels > :last-child { display: none; }
+        }
+      `}</style>
       <div
         ref={toastRef}
+        className="dashboard-toast"
         style={{
           position: "absolute",
           top: 90,
@@ -243,40 +289,34 @@ export default function DashboardOverlay() {
         }}
       >
         <div
+          className="dashboard-frame"
           style={{
             background: "#3a3a3a",
-            borderRadius: 16,
-            padding: "14px 14px 0",
             boxShadow: "0 32px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)",
             border: "1px solid rgba(255,255,255,0.08)",
           }}
         >
           <div
+            className="dashboard-window"
             style={{
               position: "relative",
               display: "flex",
               background: "#F7F8FC",
               overflow: "hidden",
-              minHeight: 480,
               borderRadius: "4px 4px 0 0",
             }}
           >
             <style>{`@keyframes gh-click { 0% { transform: scale(0.35); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }`}</style>
-            <TourCursor cursor={cursor} ring={ring} />
+            <div className="dashboard-tour-cursor">
+              <TourCursor cursor={cursor} ring={ring} />
+            </div>
 
             <NavRail />
             <SidebarNav nav={nav} />
 
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+            <div className="dashboard-main">
               <TopBar />
-              <div
-                style={{
-                  position: "relative",
-                  flex: 1,
-                  padding: "14px 16px 0",
-                  overflow: "hidden",
-                }}
-              >
+              <div className="dashboard-content">
                 <DashboardScreen />
                 <PaymentsScreen active={nav === "payments"} />
                 <MembersScreen active={nav === "members"} />

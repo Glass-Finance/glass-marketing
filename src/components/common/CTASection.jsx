@@ -304,6 +304,7 @@ export default function CTASection({
             ref={btnRef}
             onClick={onButtonClick}
             loading={buttonDisabled}
+            radius="sm"
             className="relative z-[5]"
             style={{
               boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
@@ -343,6 +344,7 @@ export default function CTASection({
             ref={btnRef}
             onClick={onButtonClick}
             loading={buttonDisabled}
+            radius="sm"
             className="relative z-[5]"
             style={{
               boxShadow: "0 4px 20px rgba(0,0,0,0.25)",

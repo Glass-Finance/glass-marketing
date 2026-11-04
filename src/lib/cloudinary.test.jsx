@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { cldUrl, cldSrcSet } from "./cloudinary";
+import { cldUrl, cldSrcSet, cldVideoUrl } from "./cloudinary";
 
 const CLOUD = "ece5jmhy";
 
@@ -24,6 +24,12 @@ describe("cldUrl", () => {
     );
   });
 
+  it("preserves SVG delivery when requested", () => {
+    expect(cldUrl("glass/solution/automate", { width: 800, format: "svg" })).toBe(
+      `https://res.cloudinary.com/${CLOUD}/image/upload/f_svg,q_auto,c_limit,w_800/glass/solution/automate`,
+    );
+  });
+
   it("applies blur as a low-quality placeholder variant", () => {
     const url = cldUrl("glass/hero/hero", { blur: true });
     expect(url).toContain("e_blur:1200");
@@ -45,6 +51,24 @@ describe("cldSrcSet", () => {
     expect(entries).toHaveLength(3);
     expect(entries[1]).toBe(
       `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,c_limit,w_800/glass/hero/hero 800w`,
+    );
+  });
+
+  it("forwards the requested delivery format to each srcSet URL", () => {
+    const set = cldSrcSet("glass/solution/automate", [400, 800], { format: "svg" });
+    expect(set).toContain(
+      `https://res.cloudinary.com/${CLOUD}/image/upload/f_svg,q_auto,c_limit,w_400/glass/solution/automate 400w`,
+    );
+    expect(set).toContain(
+      `https://res.cloudinary.com/${CLOUD}/image/upload/f_svg,q_auto,c_limit,w_800/glass/solution/automate 800w`,
+    );
+  });
+});
+
+describe("cldVideoUrl", () => {
+  it("builds a responsive browser-compatible WebM delivery URL", () => {
+    expect(cldVideoUrl("glass/hero/dashboard-animation")).toBe(
+      `https://res.cloudinary.com/${CLOUD}/video/upload/f_webm,q_auto/glass/hero/dashboard-animation`,
     );
   });
 });

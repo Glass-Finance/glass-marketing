@@ -19,17 +19,9 @@
  */
 
 import { useEffect, useRef } from "react";
+import { Clock3, Eye } from "lucide-react";
 import { cldUrl } from "../../lib/cloudinary";
-import { Button } from "../ui/Button";
-
-/* The five beats of the story, in order. */
-const STEPS = [
-  ["Fri · 6:10 PM", "Group chat", "Claims with screenshots nobody can verify."],
-  ["Fri · 7:08 PM", "Bank alerts", "They name a sender, never a member or a due."],
-  ["Sat · 10:05 AM", "Reconciling by hand", "Alerts, notes and screenshots compared one by one."],
-  ["Sun · 8:30 PM", "Spreadsheet", "Typed in late. The totals still don't match the bank."],
-  ["Sat · 11:42 PM", "A member asks", "Where is the money going? No statement to check."],
-];
+import ProblemStoryBackdrop from "../ProblemStoryBackdrop";
 
 /**
  * Class map for the markup the timeline injects. Keys are the semantic role;
@@ -166,7 +158,6 @@ const RECEIPT_SCREENSHOT = `
 
 export default function ProblemSection() {
   const rootRef = useRef(null);
-  const restartRef = useRef(() => {});
 
   useEffect(() => {
     const root = rootRef.current;
@@ -376,14 +367,8 @@ export default function ProblemSection() {
           if (run !== R) throw 0; // superseded — unwind quietly
         });
 
-      const markers = $$("step");
       try {
-        $("verdict").classList.remove("on");
         for (let i = index; i < SCENES.length; i++) {
-          markers.forEach((m, k) => {
-            m.classList.toggle("active", k === i);
-            m.classList.toggle("done", k < i);
-          });
           $$("scene").forEach((s, k) => s.classList.toggle("on", k === i));
           // Marks the stage so its height can follow the active scene's content
           // on phones (see the [data-role="stage"][data-scene] rules in
@@ -395,12 +380,10 @@ export default function ProblemSection() {
           await SCENES[i](wait);
           if (i < SCENES.length - 1) await wait(500);
         }
-        markers.forEach((m) => m.classList.add("done"));
-        $("verdict").classList.add("on");
         await wait(5000);
         play(0);
       } catch {
-        /* stopped: replay clicked, a step was jumped to, or unmounted */
+        /* stopped: replay clicked or component unmounted */
       }
     }
 
@@ -444,8 +427,6 @@ export default function ProblemSection() {
 
     fit();
     window.addEventListener("resize", fit);
-    restartRef.current = (index = 0) => play(index);
-
     let started = false;
     if ("IntersectionObserver" in window) {
       observer = new IntersectionObserver(
@@ -477,111 +458,55 @@ export default function ProblemSection() {
     >
       <div className="mx-auto max-w-[1200px]">
         {/* ── Header ── */}
-        <header className="grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] items-end gap-x-16 gap-y-6 max-[1040px]:grid-cols-1 max-[1040px]:items-start">
-          <div>
-            <div className="inline-flex items-center rounded-full border border-brand-deep/25 px-5 py-2 text-[13px] font-medium text-brand-deep">
-              The Problem
-            </div>
-            <h2 className="mt-[18px] max-w-[20ch] text-[clamp(26px,5vw,58px)] font-bold leading-[1.15] tracking-[-0.02em] text-balance text-brand-ink">
-              Still spending weekends chasing payments?
-            </h2>
+        <header className="mx-auto max-w-[900px] text-center">
+          <div className="inline-flex items-center rounded-full border border-brand-deep/25 px-5 py-2 text-[13px] font-medium text-brand-deep">
+            The Problem
           </div>
-          <p className="m-0 max-w-[34ch] text-[clamp(15px,2vw,17px)] leading-[1.45]">
+          <h2 className="mt-[18px] w-full text-center font-[Inter,sans-serif] text-[clamp(32px,3.89vw,56px)] leading-normal font-bold text-brand-navy">
+            Still spending weekends chasing payments?
+          </h2>
+          <p className="mx-auto mt-4 max-w-[56ch] text-[clamp(15px,2vw,17px)] leading-[1.7]">
             Without centralized visibility, time is wasted and trust begins to weaken.
           </p>
         </header>
 
-        {/* ── Story controls ── */}
-        <div className="mt-14 flex flex-wrap items-center justify-between gap-x-6 gap-y-2.5">
-          <h3 className="m-0 text-[clamp(1.15rem,2vw,1.4rem)] font-semibold tracking-[-0.02em] text-[#0f1d6e]">
-            One ₦25,000 dues payment, followed from Friday to Sunday
-          </h3>
-          <div className="flex items-center gap-3.5 text-[12px]">
-            <span>Sample data</span>
-            <Button
-              variant="outline-neutral"
-              size="sm"
-              fullWidth={false}
-              type="button"
-              onClick={() => restartRef.current(0)}
-            >
-              ↻ Replay
-            </Button>
-          </div>
+        <div className="mt-10 grid gap-8 md:grid-cols-2 md:gap-12">
+          <article className="flex items-start gap-4">
+            <span className="grid size-12 flex-none place-items-center rounded-full border border-[#ecedf3] bg-white/70 text-[#002fa7] md:size-16">
+              <Clock3 aria-hidden="true" size={24} strokeWidth={1.7} />
+            </span>
+            <div>
+              <h3 className="text-[clamp(16px,2vw,24px)] font-semibold leading-[1.35] text-[#001f6e]">
+                How much time goes into tracking and confirming payments?
+              </h3>
+              <p className="mt-1 text-[clamp(12px,1.5vw,18px)] leading-[1.5] text-[#808080]">
+                Checking bank alerts and updating spreadsheets takes up valuable time every month.
+              </p>
+            </div>
+          </article>
+          <article className="flex items-start gap-4">
+            <span className="grid size-12 flex-none place-items-center rounded-full border border-[#ecedf3] bg-white/70 text-[#002fa7] md:size-16">
+              <Eye aria-hidden="true" size={24} strokeWidth={1.7} />
+            </span>
+            <div>
+              <h3 className="text-[clamp(16px,2vw,24px)] font-semibold leading-[1.35] text-[#001f6e]">
+                Ever struggled to confirm whether a payment was made?
+              </h3>
+              <p className="mt-1 text-[clamp(12px,1.5vw,18px)] leading-[1.5] text-[#808080]">
+                Without clear records, it&apos;s hard to know who paid, what for, and what&apos;s
+                outstanding.
+              </p>
+            </div>
+          </article>
         </div>
 
         {/* ── Player ── */}
-        <div
-          data-role="player"
-          className="mt-5 grid grid-cols-[340px_minmax(0,1fr)] items-stretch gap-8 max-[1040px]:grid-cols-1"
-        >
-          <ol className="relative m-0 list-none gap-2 overflow-x-auto p-0 max-[1040px]:flex">
-            {STEPS.map(([when, where, why], i) => (
-              <li
-                key={when}
-                data-role="step"
-                // role="button" on an <li> is flagged by
-                // no-noninteractive-element-to-interactive-role. This is
-                // deliberate: each step is a control (it restarts the demo),
-                // so it needs a button role, and it carries tabIndex +
-                // onKeyDown below so it is genuinely keyboard-operable.
-                // A native <button> would also satisfy the rule, but nesting
-                // one inside the <ol> changes the DOM the surrounding CSS and
-                // the reset-button reset animation are keyed to -- a layout
-                // regression I can't verify visually from here. Suppress here
-                // rather than weaken the rule for the whole repo.
-                // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
-                role="button"
-                tabIndex={0}
-                aria-label={`Replay from step ${i + 1}: ${where}`}
-                onClick={() => restartRef.current(i)}
-                onKeyDown={(e) => {
-                  // Each step restarts the demo from that point, which is why
-                  // these look like controls. Without this the whole timeline
-                  // was reachable by mouse only -- a keyboard user could not
-                  // scrub back to an earlier step at all.
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    restartRef.current(i);
-                  }
-                }}
-                className="group relative cursor-pointer pb-[22px] pl-[52px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus max-[1040px]:flex max-[1040px]:flex-none max-[1040px]:items-center max-[1040px]:p-0 [&::before]:absolute [&::before]:bottom-[2px] [&::before]:left-[15px] [&::before]:top-[34px] [&::before]:border-l-2 [&::before]:border-dashed [&::before]:border-[#cdd0e2] [&::before]:content-[''] max-[1040px]:[&::before]:hidden [&:last-child::before]:hidden [.done_&]:[&::before]:border-solid"
-              >
-                <span className="absolute top-0 left-0 grid size-8 place-items-center rounded-full border-2 border-[#cdd0e2] bg-white text-[13px] font-semibold text-[#6b7280] transition duration-400 group-[.active]:border-[#002fa7] group-[.active]:bg-[#002fa7] group-[.active]:text-white group-[.active]:shadow-[0_0_0_6px_rgba(59,43,184,0.14)] [.done_&]:border-[#002fa7] [.done_&]:text-[#002fa7] max-[1040px]:static max-[1040px]:size-7 [&.done_&>b]:hidden max-[1040px]:[&.done_&>b]:block max-[1040px]:[&.done_&>b]:text-[15px]">
-                  <b>{i + 1}</b>
-                </span>
-                <div className="text-[11.5px] font-semibold tracking-[0.05em] text-[#6b7280] uppercase max-[1040px]:hidden">
-                  {when}
-                </div>
-                <h4 className="mt-0.5 text-[18px] tracking-[-0.01em] text-[#9a9db3] transition duration-300 group-[.active]:text-[#0f1d6e] group-[.done]:text-[#0f1d6e] max-[1040px]:hidden max-[1040px]:group-[.active]:block max-[1040px]:group-[.active]:mt-0 max-[1040px]:group-[.active]:ml-2">
-                  {where}
-                </h4>
-                <p className="mt-0 max-h-0 translate-y-[-8px] overflow-hidden text-[15px] leading-[1.45] transition duration-500 group-[.active]:mt-1 group-[.active]:max-h-20 group-[.active]:translate-y-0 max-[1040px]:hidden">
-                  {why}
-                </p>
-              </li>
-            ))}
-          </ol>
-
+        <div data-role="player" className="mt-10">
           <div
             data-role="stage"
-            className="relative min-h-[640px] overflow-hidden rounded-[20px] bg-[linear-gradient(160deg,#d8d9de,#bfc1c9)] transition-[min-height] duration-500 max-[1040px]:min-h-[620px] max-[600px]:min-h-[620px]"
+            className="relative isolate min-h-[640px] overflow-hidden rounded-[20px] border border-black/10 transition-[min-height] duration-500 max-[1040px]:min-h-[620px] max-[600px]:min-h-[620px]"
           >
-            {/* Decorative logo marks */}
-            <img
-              src={cldUrl("glass/problem/logo-mark-lg", { width: 520 })}
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none absolute right-[-30px] top-[-10px] w-[520px] animate-[var(--animate-gps-drift)] max-[600px]:right-0 max-[600px]:w-[210px]"
-            />
-            <img
-              src={cldUrl("glass/problem/logo-mark-sm", { width: 150 })}
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none absolute bottom-[30px] left-0 w-[150px] animate-[var(--animate-gps-drift)] max-[600px]:bottom-[16px] max-[600px]:w-[90px]"
-              style={{ animationDelay: "-6s" }}
-            />
-
+            <ProblemStoryBackdrop className="absolute inset-0 rounded-[20px]" />
             {/* ── Scene 1: group chat ── */}
             <div
               data-role="scene"
@@ -848,41 +773,6 @@ export default function ProblemSection() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* ── Verdict ── */}
-        <div
-          data-role="verdict"
-          className="mt-6 rounded-xl border border-[#e2e4ee] bg-white px-7 py-[22px] text-[clamp(1.1rem,2vw,1.4rem)] leading-[1.35] text-[#0f1d6e] [clip-path:inset(0_100%_0_0)] transition-[clip-path] duration-800 [&.on]:[clip-path:inset(0)]"
-        >
-          <b className="font-bold">Five places hold one payment.</b>{" "}
-          <span className="text-[#6b7280]">None of them is the record.</span>
-        </div>
-
-        {/* ── Time / Trust ── */}
-        <div className="mt-16 grid grid-cols-2 border-t border-[#e2e4ee] max-[1040px]:mt-12 max-[1040px]:grid-cols-1">
-          <div className="py-9 pr-12 pb-2">
-            <div className="text-[12px] font-semibold tracking-[0.14em] text-[#002fa7] uppercase">
-              Time
-            </div>
-            <h4 className="mt-3 max-w-[20ch] text-[clamp(1.45rem,2.5vw,1.85rem)] leading-[1.18] font-semibold tracking-[-0.025em] text-balance text-[#0f1d6e]">
-              How much time is your team losing to manual reconciliation?
-            </h4>
-            <p className="mt-3.5 max-w-[34ch]">
-              Bank alerts and spreadsheets consume hours every month.
-            </p>
-          </div>
-          <div className="border-l border-[#e2e4ee] py-9 pr-0 pb-2 pl-12 max-[1040px]:mt-5 max-[1040px]:border-t max-[1040px]:border-l-0 max-[1040px]:py-7 max-[1040px]:pr-0 max-[1040px]:pl-0">
-            <div className="text-[12px] font-semibold tracking-[0.14em] text-[#002fa7] uppercase">
-              Trust
-            </div>
-            <h4 className="mt-3 max-w-[20ch] text-[clamp(1.45rem,2.5vw,1.85rem)] leading-[1.18] font-semibold tracking-[-0.025em] text-balance text-[#0f1d6e]">
-              Can your members clearly see how funds are managed?
-            </h4>
-            <p className="mt-3.5 max-w-[34ch]">
-              Limited transparency reduces trust and slows compliance.
-            </p>
           </div>
         </div>
       </div>

@@ -40,6 +40,7 @@ function cloudName() {
  * Build a Cloudinary delivery URL.
  * @param {string} publicId - e.g. "glass/hero/hero"
  * @param {object} [opts]
+ * @param {"auto"|"svg"} [opts.format] - delivery format, default "auto"
  * @param {number} [opts.width] - target width in px (w_)
  * @param {number} [opts.dpr] - device pixel ratio (dpr_), e.g. 2 for retina
  * @param {string} [opts.crop] - crop mode (c_), default "limit" (never upscale)
@@ -47,14 +48,20 @@ function cloudName() {
  * @param {boolean} [opts.blur] - low-quality blurred placeholder variant
  */
 export function cldUrl(publicId, opts = {}) {
-  const { width, dpr, crop = "limit", quality = "auto", blur = false } = opts;
+  const { format = "auto", width, dpr, crop = "limit", quality = "auto", blur = false } = opts;
 
-  const parts = ["f_auto", `q_${quality}`, `c_${crop}`];
+  const parts = [`f_${format}`, `q_${quality}`, `c_${crop}`];
   if (width) parts.push(`w_${width}`);
   if (dpr) parts.push(`dpr_${dpr}`);
   if (blur) parts.push("e_blur:1200", "q_auto:low", "w_32");
 
   return `https://res.cloudinary.com/${cloudName()}/image/upload/${parts.join(",")}/${publicId}`;
+}
+
+/** Build a Cloudinary video delivery URL. */
+export function cldVideoUrl(publicId, opts = {}) {
+  const { format = "webm", quality = "auto" } = opts;
+  return `https://res.cloudinary.com/${cloudName()}/video/upload/f_${format},q_${quality}/${publicId}`;
 }
 
 /**

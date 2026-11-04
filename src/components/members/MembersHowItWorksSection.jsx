@@ -3,21 +3,15 @@ import { motion } from "motion/react";
 import { goToApp } from "../../utils/deviceRedirect";
 import { cldUrl } from "../../lib/cloudinary";
 
-const memberSignupCard = cldUrl("glass/howItWorks/member-signup-card", {
-  width: 2400,
-});
+const memberSignupCard = cldUrl("glass/howItWorks/member-signup-card", { width: 2400 });
 const memberSignupCardMobile = cldUrl("glass/howItWorks/member-signup-card-mobile", {
   width: 1600,
 });
-const memberAcceptInvite = cldUrl("glass/howItWorks/member-accept-invite", {
-  width: 1600,
-});
+const memberAcceptInvite = cldUrl("glass/howItWorks/member-accept-invite", { width: 1600 });
 const memberAcceptInviteMobile = cldUrl("glass/howItWorks/member-accept-invite-mobile", {
   width: 1600,
 });
-const memberAutopay = cldUrl("glass/howItWorks/member-autopay", {
-  width: 1600,
-});
+const memberAutopay = cldUrl("glass/howItWorks/member-autopay", { width: 1600 });
 const memberAutopayMobile = cldUrl("glass/howItWorks/member-autopay-mobile", {
   width: 1600,
 });
@@ -74,12 +68,12 @@ export default function MembersHowItWorksSection() {
           <img
             src={memberAcceptInvite}
             alt="Accept Your Community Invite"
-            className="w-[357px] h-[436px] lg:w-[595px] lg:h-[727px] shrink-0 rounded-[8px]"
+            className="order-1 w-[357px] h-[436px] lg:w-[595px] lg:h-[727px] shrink-0 rounded-[8px]"
           />
           <img
             src={memberAutopay}
             alt="Automate your dues. Never miss a payment."
-            className="w-[357px] h-[436px] lg:w-[595px] lg:h-[727px] shrink-0 rounded-[8px]"
+            className="order-2 w-[357px] h-[436px] lg:w-[595px] lg:h-[727px] shrink-0 rounded-[8px]"
           />
         </div>
       </div>
@@ -108,7 +102,7 @@ export default function MembersHowItWorksSection() {
             onClick={handleJoin}
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.97 }}
-            className="relative inline-flex items-center gap-3 bg-[#0f1d6e] text-white font-bold text-[14px] px-8 py-4 rounded-full overflow-hidden shadow-2xl shadow-[#0f1d6e]/25"
+            className="relative inline-flex items-center gap-3 rounded-sm bg-[#002fa7] px-8 py-4 text-[14px] font-bold text-white shadow-2xl shadow-[#002fa7]/25"
           >
             <motion.span
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full"

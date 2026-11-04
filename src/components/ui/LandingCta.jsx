@@ -13,6 +13,7 @@ export const LandingCta = forwardRef(function LandingCta(
     disabled,
     loading,
     compact = false,
+    radius = "full",
     className = "",
     ...rest
   },
@@ -37,7 +38,8 @@ export const LandingCta = forwardRef(function LandingCta(
         // Tailwind does not guarantee cascade order between two arbitrary
         // utilities like h-[50px] and h-[42px].
         compact ? "h-[42px]" : "h-[50px]",
-        "px-9 rounded-full",
+        "px-9",
+        radius === "sm" ? "rounded-sm" : "rounded-full",
         // Near-white, not pure white, and black 500/15 label.
         "bg-[#fafbfc] text-black text-[15px] font-medium",
         // Hover/pressed were not measurable via REST; this conservative

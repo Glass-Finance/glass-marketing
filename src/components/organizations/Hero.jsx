@@ -4,8 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { Reveal } from "../Reveal";
 import { motion } from "motion/react";
 import { useEffect } from "react";
-import { ScaledDashboard } from "./dashboard-overlay";
-import { cldUrl } from "../../lib/cloudinary";
+import { cldUrl, cldVideoUrl } from "../../lib/cloudinary";
 import { LandingCta } from "../ui/LandingCta";
 
 // Previously `const waveBg = "/hero.webp"` — a raw path into the public/
@@ -14,6 +13,7 @@ import { LandingCta } from "../ui/LandingCta";
 // asset) got build-time optimization. Both heroes now go through the same
 // cldUrl() helper and the same public_id, so they can't diverge again.
 const waveBg = cldUrl("glass/hero/hero", { width: 1920 });
+const dashboardVideo = cldVideoUrl("glass/hero/dashboard-animation");
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 export default function Hero() {
@@ -102,23 +102,20 @@ export default function Hero() {
           style={{ fontFamily: "Inter,-apple-system,sans-serif" }}
         >
           <Reveal variant="up" delay={80}>
-            <h1
-              className="font-semibold text-white leading-[1.05] tracking-tight mb-5 text-center max-w-[480px] lg:max-w-[720px] mx-auto"
-              style={{ fontSize: "clamp(34px,8.5vw,70px)" }}
-            >
-              Community Finance
-              <br className="lg:hidden" /> Crystal Clear
+            <h1 className="mx-auto mb-5 max-w-[885px] text-center text-[clamp(34px,6vw,64px)] font-bold leading-[1.05] tracking-tight text-white">
+              Manage Community Payments Effortlessly.
             </h1>
           </Reveal>
           <Reveal variant="up" delay={160}>
-            <p className="text-[15px] sm:text-[16px] text-white/55 leading-relaxed max-w-[540px] mx-auto mb-8 sm:mb-6">
-              Save 15–20 hours monthly chasing payments. The transparent way for Nigerian
-              associations, clubs, and schools to manage funds.
+            <p className="mx-auto mb-8 max-w-[767px] text-[16px] leading-relaxed text-white/70 sm:text-[18px]">
+              Create payment plans, collect dues and contributions, and track every member&apos;s
+              payment in one place. No more chasing transfers or updating spreadsheets.
             </p>
           </Reveal>
           <Reveal variant="up" delay={240}>
             <div className="flex items-center justify-center gap-3 flex-wrap">
               <LandingCta
+                radius="sm"
                 onClick={() => goToApp("/sign-up", navigate)}
                 onMouseMove={(e) => {
                   const r = e.currentTarget.getBoundingClientRect();
@@ -152,8 +149,18 @@ export default function Hero() {
 
         <Reveal variant="up" delay={360}>
           <div className="relative z-10 w-full px-4 sm:px-8 pb-0">
-            <div className="w-full max-w-[960px] mx-auto">
-              <ScaledDashboard />
+            <div className="mx-auto aspect-[4/3] w-full max-w-[960px] overflow-hidden rounded-t-[12px] border border-white/10 bg-[#111] shadow-[0_32px_100px_rgba(0,0,0,0.7)] sm:aspect-[16/10] sm:rounded-t-[16px] lg:aspect-video">
+              <video
+                className="block h-full w-full object-cover object-top"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-label="Animated preview of the Glass community payments dashboard"
+              >
+                <source src={dashboardVideo} type="video/webm" />
+              </video>
             </div>
           </div>
         </Reveal>

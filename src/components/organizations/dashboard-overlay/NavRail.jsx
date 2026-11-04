@@ -2,6 +2,7 @@
 export default function NavRail() {
   return (
     <div
+      className="dashboard-nav-rail"
       style={{
         width: 56,
         background: "#002FA7",

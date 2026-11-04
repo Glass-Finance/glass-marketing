@@ -3,21 +3,15 @@ import { motion } from "motion/react";
 import { goToApp } from "../../utils/deviceRedirect";
 import { cldUrl } from "../../lib/cloudinary";
 
-const orgCreateCommunity = cldUrl("glass/howItWorks/org-create-community", {
-  width: 2100,
-});
+const orgCreateCommunity = cldUrl("glass/howItWorks/org-create-community", { width: 2100 });
 const orgCreateCommunityMobile = cldUrl("glass/howItWorks/org-create-community-mobile", {
   width: 1600,
 });
-const orgAddMembers = cldUrl("glass/howItWorks/org-add-members", {
-  width: 1440,
-});
+const orgAddMembers = cldUrl("glass/howItWorks/org-add-members", { width: 1440 });
 const orgAddMembersMobile = cldUrl("glass/howItWorks/org-add-members-mobile", {
   width: 1440,
 });
-const orgPaymentPlan = cldUrl("glass/howItWorks/org-payment-plan", {
-  width: 1780,
-});
+const orgPaymentPlan = cldUrl("glass/howItWorks/org-payment-plan", { width: 1780 });
 const orgPaymentPlanMobile = cldUrl("glass/howItWorks/org-payment-plan-mobile", { width: 1600 });
 const orgLaunch = cldUrl("glass/howItWorks/org-launch", { width: 1780 });
 const orgLaunchMobile = cldUrl("glass/howItWorks/org-launch-mobile", {
@@ -80,12 +74,12 @@ export default function OrganizationHowItWorks() {
           <img
             src={orgPaymentPlan}
             alt="Create your payment plan"
-            className="w-[357px] h-[436px] lg:w-[595px] lg:h-[727px] shrink-0 rounded-[8px]"
+            className="w-[425px] h-[436px] lg:w-[709px] lg:h-[727px] shrink-0 rounded-[8px]"
           />
           <img
             src={orgLaunch}
             alt="Launch Your Community"
-            className="w-[357px] h-[436px] lg:w-[595px] lg:h-[727px] shrink-0 rounded-[8px]"
+            className="w-[288px] h-[436px] lg:w-[480px] lg:h-[727px] shrink-0 rounded-[8px]"
           />
         </div>
       </div>
@@ -119,7 +113,7 @@ export default function OrganizationHowItWorks() {
             onClick={onCtaClick}
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.97 }}
-            className="relative inline-flex items-center gap-3 bg-[#0f1d6e] text-white font-bold text-[14px] px-8 py-4 rounded-full overflow-hidden shadow-2xl shadow-[#0f1d6e]/25"
+            className="relative inline-flex items-center gap-3 rounded-sm bg-[#002fa7] px-8 py-4 text-[14px] font-bold text-white shadow-2xl shadow-[#002fa7]/25"
           >
             <motion.span
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full"
