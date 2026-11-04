@@ -146,15 +146,13 @@ export default function Navbar() {
             lighter sections without hiding what's behind it. The mobile
             menu lives inside this shell too — the pill grows into the panel
             instead of a second card opening under it — so the shell clips
-            to its corners and holds one radius (30px: full-round at
-            resting height, a card's corners once expanded); animating
-            rounded-full → a small radius wouldn't interpolate cleanly in
-            Tailwind v4. An open menu covers the whole panel, so it goes
+            to its corners. The collapsed shell uses the pill exception;
+            when expanded it uses the documented 16px radius. An open menu covers the whole panel, so it goes
             solid black — even at black/95 the white page behind it lifted
             the panel to gray and ghosted the copy through the links and
             buttons. ── */}
         <div
-          className={`mx-3 sm:mx-6 lg:mx-auto lg:w-fit max-w-[1280px] overflow-hidden rounded-[30px] transition-all duration-300 ${
+          className={`mx-3 sm:mx-6 lg:mx-auto lg:w-fit max-w-[1280px] overflow-hidden ${menuOpen ? "rounded-g-4" : "rounded-full"} transition-all duration-300 ${
             scrolled || menuOpen ? "shadow-[0_8px_32px_rgba(0,0,0,0.35)]" : "shadow-none"
           } ${menuOpen ? "bg-black" : scrolled ? "bg-black/80" : "bg-transparent"}`}
         >
