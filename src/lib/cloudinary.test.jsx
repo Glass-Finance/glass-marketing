@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { cldUrl, cldSrcSet } from "./cloudinary";
+import { cldUrl, cldSrcSet, cldVideoUrl } from "./cloudinary";
 
 const CLOUD = "ece5jmhy";
 
@@ -61,6 +61,14 @@ describe("cldSrcSet", () => {
     );
     expect(set).toContain(
       `https://res.cloudinary.com/${CLOUD}/image/upload/f_svg,q_auto,c_limit,w_800/glass/solution/automate 800w`,
+    );
+  });
+});
+
+describe("cldVideoUrl", () => {
+  it("builds a responsive browser-compatible WebM delivery URL", () => {
+    expect(cldVideoUrl("glass/hero/dashboard-animation")).toBe(
+      `https://res.cloudinary.com/${CLOUD}/video/upload/f_webm,q_auto/glass/hero/dashboard-animation`,
     );
   });
 });
