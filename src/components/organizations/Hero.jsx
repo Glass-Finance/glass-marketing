@@ -4,8 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { Reveal } from "../Reveal";
 import { motion } from "motion/react";
 import { useEffect } from "react";
-import { ScaledDashboard } from "./dashboard-overlay";
-import { cldUrl } from "../../lib/cloudinary";
+import { cldUrl, cldVideoUrl } from "../../lib/cloudinary";
 import { LandingCta } from "../ui/LandingCta";
 
 // Previously `const waveBg = "/hero.webp"` — a raw path into the public/
@@ -14,6 +13,7 @@ import { LandingCta } from "../ui/LandingCta";
 // asset) got build-time optimization. Both heroes now go through the same
 // cldUrl() helper and the same public_id, so they can't diverge again.
 const waveBg = cldUrl("glass/hero/hero", { width: 1920 });
+const dashboardVideo = cldVideoUrl("glass/hero/dashboard-animation");
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 export default function Hero() {
@@ -149,8 +149,18 @@ export default function Hero() {
 
         <Reveal variant="up" delay={360}>
           <div className="relative z-10 w-full px-4 sm:px-8 pb-0">
-            <div className="w-full max-w-[960px] mx-auto">
-              <ScaledDashboard />
+            <div className="mx-auto aspect-[4/3] w-full max-w-[960px] overflow-hidden rounded-t-[12px] border border-white/10 bg-[#111] shadow-[0_32px_100px_rgba(0,0,0,0.7)] sm:aspect-[16/10] sm:rounded-t-[16px] lg:aspect-video">
+              <video
+                className="block h-full w-full object-cover object-top"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-label="Animated preview of the Glass community payments dashboard"
+              >
+                <source src={dashboardVideo} type="video/webm" />
+              </video>
             </div>
           </div>
         </Reveal>

@@ -58,6 +58,12 @@ export function cldUrl(publicId, opts = {}) {
   return `https://res.cloudinary.com/${cloudName()}/image/upload/${parts.join(",")}/${publicId}`;
 }
 
+/** Build a Cloudinary video delivery URL. */
+export function cldVideoUrl(publicId, opts = {}) {
+  const { format = "webm", quality = "auto" } = opts;
+  return `https://res.cloudinary.com/${cloudName()}/video/upload/f_${format},q_${quality}/${publicId}`;
+}
+
 /**
  * Build a srcSet string across a set of widths, for responsive delivery.
  * @param {string} publicId
