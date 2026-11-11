@@ -940,9 +940,8 @@ export default function PhoneHeroDemo({ className = "" }) {
 // ─── Scaled wrapper ───────────────────────────────────────────────────────────
 // PhoneHeroDemo's internals are all fixed-pixel (876×791, matched exactly to
 // the homography corner coordinates) — same "render at natural size, scale
-// the whole thing down to fit" approach already used for the admin dashboard
-// mockup in organizations/Hero.jsx's ScaledDashboard, so it drops into
-// whatever width the desktop/mobile hero layout gives it.
+// the whole thing down to fit" approach, so it drops into whatever width the
+// desktop/mobile hero layout gives it without distorting its internal layout.
 export function ScaledPhoneHeroDemo({ maxWidth, className = "" }) {
   const outerRef = useRef(null);
   const [scale, setScale] = useState(1);
