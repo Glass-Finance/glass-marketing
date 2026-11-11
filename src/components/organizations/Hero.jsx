@@ -103,12 +103,12 @@ export default function Hero() {
           style={{ fontFamily: "Inter,-apple-system,sans-serif" }}
         >
           <Reveal variant="up" delay={80}>
-            <h1 className="mx-auto mb-3 max-w-[885px] text-center text-[clamp(30px,6vw,64px)] font-bold leading-[1.05] tracking-tight text-white sm:mb-5">
+            <h1 className="mx-auto mb-7 max-w-[885px] text-center text-[clamp(30px,6vw,64px)] font-bold leading-[1.05] tracking-tight text-white sm:mb-8">
               Manage Community Payments Effortlessly.
             </h1>
           </Reveal>
           <Reveal variant="up" delay={160}>
-            <p className="mx-auto mb-4 max-w-[767px] text-[16px] leading-[1.25] text-white/70 sm:mb-8 sm:text-[18px] sm:leading-relaxed">
+            <p className="mx-auto mb-8 max-w-[767px] text-[16px] leading-[1.25] text-white/70 sm:mb-10 sm:text-[18px] sm:leading-relaxed">
               Create payment plans, collect dues and contributions, and track every member&apos;s
               payment in one place. No more chasing transfers or updating spreadsheets.
             </p>
