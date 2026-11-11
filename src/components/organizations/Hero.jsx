@@ -14,6 +14,7 @@ import { LandingCta } from "../ui/LandingCta";
 // cldUrl() helper and the same public_id, so they can't diverge again.
 const waveBg = cldUrl("glass/hero/hero", { width: 1920 });
 const dashboardVideo = cldVideoUrl("glass/hero/dashboard-animation");
+const dashboardVideoMp4 = cldVideoUrl("glass/hero/dashboard-animation", { format: "mp4" });
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 export default function Hero() {
@@ -43,7 +44,7 @@ export default function Hero() {
         .hero-blur-blobs { display: none !important; }
       }
     `}</style>
-      <section className="relative overflow-hidden pt-[120px]">
+      <section className="relative h-[599px] overflow-hidden pt-[107px] sm:h-auto sm:pt-[120px] xl:h-[979px]">
         <div
           className="hero-wave-bg absolute inset-0 w-full h-full"
           style={{
@@ -98,16 +99,16 @@ export default function Hero() {
         </div>
 
         <div
-          className="relative z-10 w-full max-w-[720px] mx-auto text-center px-6 pb-8"
+          className="relative z-10 w-full max-w-[720px] mx-auto text-center px-6 pb-[65px] sm:pb-8"
           style={{ fontFamily: "Inter,-apple-system,sans-serif" }}
         >
           <Reveal variant="up" delay={80}>
-            <h1 className="mx-auto mb-7 max-w-[885px] text-center text-[clamp(34px,6vw,64px)] font-bold leading-[1.05] tracking-tight text-white sm:mb-8">
+            <h1 className="mx-auto mb-7 max-w-[885px] text-center text-[clamp(30px,6vw,64px)] font-bold leading-[1.05] tracking-tight text-white sm:mb-8">
               Manage Community Payments Effortlessly.
             </h1>
           </Reveal>
           <Reveal variant="up" delay={160}>
-            <p className="mx-auto mb-8 max-w-[767px] text-[16px] leading-relaxed text-white/70 sm:mb-10 sm:text-[18px]">
+            <p className="mx-auto mb-8 max-w-[767px] text-[16px] leading-[1.25] text-white/70 sm:mb-10 sm:text-[18px] sm:leading-relaxed">
               Create payment plans, collect dues and contributions, and track every member&apos;s
               payment in one place. No more chasing transfers or updating spreadsheets.
             </p>
@@ -148,10 +149,10 @@ export default function Hero() {
         </div>
 
         <Reveal variant="up" delay={360}>
-          <div className="relative z-10 w-full px-4 sm:px-8 pb-0">
-            <div className="mx-auto aspect-[4/3] w-full max-w-[960px] overflow-hidden rounded-t-[12px] border border-white/10 bg-[#111] shadow-[0_32px_100px_rgba(0,0,0,0.7)] sm:aspect-[16/10] sm:rounded-t-[16px] lg:aspect-video">
+          <div className="relative z-10 w-full px-4 sm:px-8 pb-0 xl:translate-y-[35px]">
+            <div className="mx-auto aspect-[340/455] w-full max-w-[340px] overflow-hidden rounded-[8px] bg-[#3f3f4c] p-[12px] sm:aspect-[16/10] sm:max-w-[1010px] sm:rounded-[24px] xl:aspect-[1010/1081] xl:p-[23px_22px_0]">
               <video
-                className="block h-full w-full object-cover object-top"
+                className="block h-full w-full rounded-[8px] object-cover object-top xl:rounded-[12px]"
                 autoPlay
                 muted
                 loop
@@ -159,7 +160,8 @@ export default function Hero() {
                 preload="metadata"
                 aria-label="Animated preview of the Glass community payments dashboard"
               >
-                <source src={dashboardVideo} type="video/webm" />
+                <source src={dashboardVideo} type='video/webm; codecs="vp9"' />
+                <source src={dashboardVideoMp4} type="video/mp4" />
               </video>
             </div>
           </div>
@@ -168,7 +170,7 @@ export default function Hero() {
         <div
           className="pointer-events-none absolute bottom-0 left-0 right-0 z-20 hidden sm:block"
           style={{
-            height: "130px",
+            height: "102px",
             background:
               "linear-gradient(to top, rgba(229,229,229,0.97) 0%, rgba(229,229,229,0.65) 35%, rgba(229,229,229,0.1) 75%, transparent 100%)",
           }}
@@ -176,7 +178,8 @@ export default function Hero() {
         <div
           className="pointer-events-none absolute bottom-0 left-0 right-0 z-20 block sm:hidden"
           style={{
-            height: "70px",
+            height: "102px",
+            bottom: "-6px",
             background:
               "linear-gradient(to top, rgba(229,229,229,0.95) 0%, rgba(229,229,229,0.5) 40%, transparent 100%)",
           }}
