@@ -28,14 +28,14 @@ function SecurityCard({ claim, index }) {
 
   return (
     <article
-      className={`flex min-h-[440px] w-[360px] max-w-full flex-col items-center rounded-g-4 border border-black/10 bg-[rgba(255,255,255,0.6)] px-6 pt-20 pb-6 text-center transition-transform duration-700 ${index === 0 ? "justify-between security-card-tilt-left" : "gap-10"} ${index === 2 ? "security-card-tilt-right" : ""}`}
+      className={`flex min-h-[363px] w-[360px] max-w-full flex-col items-center rounded-g-4 border border-black/10 bg-[rgba(255,255,255,0.6)] px-6 pt-20 pb-6 text-center transition-transform duration-700 ${index === 0 ? "justify-between security-card-tilt-left" : "gap-10"} ${index === 2 ? "security-card-tilt-right" : ""}`}
     >
-      <div className="relative grid size-[170px] shrink-0 place-items-center">
+      <div className="relative grid size-[110px] shrink-0 place-items-center">
         <span
           aria-hidden="true"
           className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(107,47,181,0.35)_0%,rgba(107,47,181,0.18)_45%,transparent_75%)] blur-[20px]"
         />
-        <span className="relative z-10 grid size-[78px] place-items-center rounded-full bg-white shadow-[0_0_0_6px_rgba(255,255,255,0.35),0_4px_20px_rgba(0,31,110,0.1)]">
+        <span className="relative z-10 grid size-[100px] place-items-center rounded-full bg-white shadow-[0_12px_60px_40px_rgba(187,154,229,0.25)]">
           <img
             src={icon.src}
             srcSet={icon.srcSet}
@@ -48,8 +48,10 @@ function SecurityCard({ claim, index }) {
         </span>
       </div>
       <div>
-        <h3 className="mb-3 text-[18px] font-bold leading-[1.25] text-brand-navy">{claim.title}</h3>
-        <p className="m-0 max-w-[300px] text-[14px] leading-[1.65] text-black/50">
+        <h3 className="mb-2 text-[24px] font-medium leading-[normal] text-brand-navy">
+          {claim.title}
+        </h3>
+        <p className="m-0 max-w-[300px] text-[18px] leading-[normal] tracking-[0.5px] text-black/60">
           {claim.description}
         </p>
       </div>
@@ -82,12 +84,12 @@ export default function SecurityCards({ showTribuneBanner = false }) {
         </div>
 
         {showTribuneBanner ? (
-          <aside className="mt-8 flex flex-wrap items-center justify-between gap-6 rounded-sm border border-[#002fa7]/25 bg-[#ccdaff] px-6 py-5">
+          <aside className="mt-10 flex flex-wrap items-center justify-between gap-6 rounded-g-1 border border-[#002fa7]/20 bg-[#ccdaff] px-6 py-4 xl:mt-[70px]">
             <div>
-              <h3 className="text-[18px] font-medium leading-7 text-black">
+              <h3 className="mb-1 text-[18px] font-normal leading-7 text-black">
                 Why the Nigerian Tribune is Talking About Glass
               </h3>
-              <p className="text-[16px] leading-6 text-black/70">
+              <p className="text-[16px] leading-6 text-black/60">
                 Discover how Glass is redefining community finances.
               </p>
             </div>
@@ -95,7 +97,7 @@ export default function SecurityCards({ showTribuneBanner = false }) {
               href="https://tribuneonlineng.com/team-glass-shines-as-winner-of-5th-babcock-innovation-challenge/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center justify-center rounded-sm border border-brand-navy/60 px-3 py-1.5 text-[12px] font-medium text-brand-navy no-underline transition-colors hover:bg-brand-navy hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+              className="inline-flex h-[50px] shrink-0 items-center justify-center rounded-g-1 border border-black px-6 py-3 text-[16px] font-medium leading-6 text-brand no-underline transition-colors hover:bg-black/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
               Check It Out
             </a>
