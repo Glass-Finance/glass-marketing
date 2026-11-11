@@ -150,7 +150,7 @@ export default function Hero() {
 
         <Reveal variant="up" delay={360}>
           <div className="relative z-10 w-full px-4 sm:px-8 pb-0 xl:translate-y-[35px]">
-            <div className="mx-auto aspect-[340/455] w-full max-w-[340px] overflow-hidden rounded-[8px] bg-[#3f3f4c] p-[12px] sm:aspect-[16/10] sm:max-w-[1010px] sm:rounded-[24px] xl:aspect-[1010/1081] xl:p-[23px_22px_0]">
+            <div className="mx-auto aspect-[340/455] w-full max-w-[340px] overflow-hidden rounded-[8px] sm:aspect-[16/10] sm:max-w-[1010px] sm:rounded-[24px] xl:aspect-[1010/1081]">
               <video
                 className="block h-full w-full rounded-[8px] object-cover object-top xl:rounded-[12px]"
                 autoPlay
