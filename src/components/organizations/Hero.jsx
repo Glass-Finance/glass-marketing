@@ -30,6 +30,26 @@ export default function Hero() {
     });
   }, []);
 
+  useEffect(() => {
+    const canvas = document.getElementById("hero-static-canvas");
+    if (!canvas) return;
+    const draw = () => {
+      canvas.width = canvas.offsetWidth || window.innerWidth;
+      canvas.height = canvas.offsetHeight || window.innerHeight;
+      const ctx = canvas.getContext("2d");
+      const img = ctx.createImageData(canvas.width, canvas.height);
+      for (let i = 0; i < img.data.length; i += 4) {
+        const value = Math.random() > 0.5 ? 255 : 0;
+        img.data[i] = img.data[i + 1] = img.data[i + 2] = value;
+        img.data[i + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+    };
+    draw();
+    window.addEventListener("resize", draw);
+    return () => window.removeEventListener("resize", draw);
+  }, []);
+
   return (
     <>
       <style>{`
