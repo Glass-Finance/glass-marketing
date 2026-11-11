@@ -124,7 +124,7 @@ export default function Hero() {
         >
           <Reveal variant="up" delay={80}>
             <h1 className="mx-auto mb-7 max-w-[885px] text-center text-[clamp(30px,6vw,64px)] font-bold leading-[1.05] tracking-tight text-white sm:mb-8">
-              Manage Community Payments Effortlessly.
+              Manage Community Payments Effortlessly
             </h1>
           </Reveal>
           <Reveal variant="up" delay={160}>
