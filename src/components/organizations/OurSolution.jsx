@@ -68,7 +68,7 @@ export default function OurSolution() {
     <SolutionSection
       headline="Built-In Transparency for Every Transaction"
       subtext="Centralize payments, records, and visibility in one shared system, so your team stops chasing and starts leading."
-      subtextMaxWidth={640}
+      subtextMaxWidth={783}
       features={features}
     />
   );

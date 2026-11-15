@@ -191,7 +191,10 @@ export default function SolutionSection({
               </span>
             </div>
 
-            <h2 className="text-[clamp(26px,5vw,58px)] font-bold text-[#0f1d6e] leading-[1.15] tracking-[-0.02em] mb-4">
+            <h2
+              className="mx-auto mb-2 max-w-[1159px] text-[28px] font-bold leading-[1.2] tracking-[-0.02em] text-[#001f6e] max-sm:relative max-sm:left-[-7px] md:text-[clamp(26px,5vw,58px)] md:leading-[1.17]"
+              style={{ width: "calc(100% + 14px)" }}
+            >
               <BlurText
                 text={headline}
                 animateBy="words"
@@ -203,8 +206,8 @@ export default function SolutionSection({
             </h2>
 
             <p
-              className="text-[clamp(15px,2vw,17px)] text-black/60 mx-auto leading-[1.7]"
-              style={{ maxWidth: subtextMaxWidth }}
+              className="mx-auto text-[16px] leading-[24px] text-black/60 max-sm:relative max-sm:left-[-7px] md:text-[clamp(15px,2vw,17px)] md:leading-[1.7]"
+              style={{ width: "calc(100% + 14px)", maxWidth: subtextMaxWidth }}
             >
               {subtext}
             </p>
