@@ -100,7 +100,15 @@ function useTilt(strength = 14) {
 }
 
 // ─── Feature card ─────────────────────────────────────────────────────────────
-function FeatureCard({ icon, title, desc, illustration, illustrationBackground, entryDelay }) {
+function FeatureCard({
+  icon,
+  title,
+  desc,
+  illustration,
+  illustrationBackground,
+  entryDelay,
+  organizationLayout,
+}) {
   const { cardRef, sheenRef, onMouseMove, onMouseEnter, onMouseLeave } = useTilt(14);
 
   return (
@@ -109,7 +117,9 @@ function FeatureCard({ icon, title, desc, illustration, illustrationBackground, 
       onMouseMove={onMouseMove}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="relative flex min-h-[320px] w-full cursor-default flex-col gap-6 overflow-hidden rounded-[4px] border border-black/10 bg-[rgba(255,255,255,0.6)] p-6 shadow-[0_2px_12px_rgba(28,43,138,0.07)] will-change-transform [transform-style:preserve-3d] opacity-0 sm:min-h-[380px] sm:p-8 lg:min-h-[420px]"
+      className={`relative flex min-h-[320px] w-full cursor-default flex-col gap-6 overflow-hidden rounded-[4px] border border-black/10 bg-[rgba(255,255,255,0.6)] p-6 shadow-[0_2px_12px_rgba(28,43,138,0.07)] will-change-transform [transform-style:preserve-3d] opacity-0 sm:min-h-[380px] sm:p-8 lg:min-h-[420px] ${
+        organizationLayout ? "xl:min-h-[378px] xl:px-[23px] xl:pt-8 xl:pb-1" : ""
+      }`}
       style={{
         animation: `glassCardIn 0.65s cubic-bezier(0.22,1,0.36,1) ${entryDelay}ms forwards`,
       }}
@@ -120,13 +130,17 @@ function FeatureCard({ icon, title, desc, illustration, illustrationBackground, 
         style={{ opacity: 0 }}
       />
 
-      <div className="flex min-h-[80px] items-start gap-3">
+      <div
+        className={`flex min-h-[80px] items-start gap-3 ${organizationLayout ? "xl:gap-6" : ""}`}
+      >
         <img
           src={icon.src}
           srcSet={icon.srcSet}
           sizes="50px"
           alt=""
-          className="[width:clamp(36px,5vw,50px)] [height:clamp(36px,5vw,50px)] object-contain flex-shrink-0"
+          className={`[width:clamp(36px,5vw,50px)] [height:clamp(36px,5vw,50px)] object-contain flex-shrink-0 ${
+            organizationLayout ? "xl:h-16 xl:w-16" : ""
+          }`}
           loading="lazy"
           decoding="async"
         />
@@ -139,7 +153,9 @@ function FeatureCard({ icon, title, desc, illustration, illustrationBackground, 
       </div>
 
       <div
-        className="solution-illus relative -mb-6 h-[clamp(150px,42vw,190px)] w-full flex-none overflow-hidden rounded-sm sm:-mb-8 sm:h-[clamp(220px,32vw,300px)] lg:h-auto lg:min-h-[240px] lg:flex-1"
+        className={`solution-illus relative -mb-6 h-[clamp(150px,42vw,190px)] w-full flex-none overflow-hidden rounded-sm sm:-mb-8 sm:h-[clamp(220px,32vw,300px)] lg:h-auto lg:min-h-[240px] lg:flex-1 ${
+          organizationLayout ? "xl:mb-1 xl:min-h-0" : ""
+        }`}
         style={
           illustrationBackground
             ? {
@@ -172,6 +188,7 @@ export default function SolutionSection({
   subtext,
   subtextMaxWidth = 640,
   features,
+  organizationLayout = false,
 }) {
   return (
     <>
@@ -183,7 +200,11 @@ export default function SolutionSection({
     `}</style>
 
       <section className="relative isolate py-20 md:py-28" id="solution">
-        <div className="mx-auto max-w-[1247px] px-6 relative z-30">
+        <div
+          className={`mx-auto max-w-[1247px] px-6 relative z-30 ${
+            organizationLayout ? "xl:max-w-[1264px]" : ""
+          }`}
+        >
           <div className="text-center mb-12">
             <div className="mb-5 flex justify-center">
               <span className="inline-flex items-center border border-[#1C2B8A]/25 text-[#1C2B8A] text-[13px] font-medium px-5 py-2 rounded-full">
@@ -213,7 +234,11 @@ export default function SolutionSection({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div
+            className={`grid grid-cols-1 gap-4 lg:grid-cols-2 ${
+              organizationLayout ? "xl:gap-y-6" : ""
+            }`}
+          >
             {features.map(({ icon, title, desc, illustration, illustrationBackground }, i) => (
               <FeatureCard
                 key={title}
@@ -223,6 +248,7 @@ export default function SolutionSection({
                 illustration={illustration}
                 illustrationBackground={illustrationBackground}
                 entryDelay={200 + i * 120}
+                organizationLayout={organizationLayout}
               />
             ))}
           </div>

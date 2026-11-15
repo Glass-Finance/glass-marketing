@@ -70,6 +70,7 @@ export default function OurSolution() {
       subtext="Centralize payments, records, and visibility in one shared system, so your team stops chasing and starts leading."
       subtextMaxWidth={783}
       features={features}
+      organizationLayout
     />
   );
 }
