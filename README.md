@@ -185,3 +185,21 @@ Detailed docs live in [`docs/`](docs/):
 This repository is proprietary to **Glass Limited**. No license to use or
 redistribute the software is granted by access to the repository; see
 [`LICENSE`](LICENSE).
+
+### Staging deployment
+
+Serve this marketing site at `staging.glasspay.app` and set
+`VITE_APP_URL=https://staging-app.glasspay.app` in that Vercel deployment's
+environment variables before building. Redeploy after changing the variable;
+Vite embeds it in the bundle. Keep the production deployment pointing at
+`https://app.glasspay.app`.
+
+The marketing hostname allowlist recognizes `staging.glasspay.app`. Vercel's
+host-specific redirects also send direct app routes such as `/sign-in` and
+`/member/join` to `staging-app.glasspay.app`, while production redirects keep
+their existing destination.
+
+This repo makes no backend requests. Configure
+`VITE_API_BASE_URL=https://staging-api.glasspay.app` on the separate staging
+app deployment. Its backend CORS and Google OAuth origin settings must allow
+`https://staging-app.glasspay.app` where applicable.

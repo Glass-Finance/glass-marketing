@@ -6,13 +6,139 @@
   "redirects": [
     {
       "source": "/member/:path*",
+      "destination": "https://staging-app.glasspay.app/member/:path*",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": "staging.glasspay.app"
+        }
+      ]
+    },
+    {
+      "source": "/invite",
+      "destination": "https://staging-app.glasspay.app/invite",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": "staging.glasspay.app"
+        }
+      ]
+    },
+    {
+      "source": "/invites",
+      "destination": "https://staging-app.glasspay.app/invites",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": "staging.glasspay.app"
+        }
+      ]
+    },
+    {
+      "source": "/sign-up",
+      "destination": "https://staging-app.glasspay.app/sign-up",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": "staging.glasspay.app"
+        }
+      ]
+    },
+    {
+      "source": "/sign-in",
+      "destination": "https://staging-app.glasspay.app/sign-in",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": "staging.glasspay.app"
+        }
+      ]
+    },
+    {
+      "source": "/forgot-password",
+      "destination": "https://staging-app.glasspay.app/forgot-password",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": "staging.glasspay.app"
+        }
+      ]
+    },
+    {
+      "source": "/reset-password",
+      "destination": "https://staging-app.glasspay.app/reset-password",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": "staging.glasspay.app"
+        }
+      ]
+    },
+    {
+      "source": "/check-email",
+      "destination": "https://staging-app.glasspay.app/check-email",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": "staging.glasspay.app"
+        }
+      ]
+    },
+    {
+      "source": "/onboarding/:path*",
+      "destination": "https://staging-app.glasspay.app/onboarding/:path*",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": "staging.glasspay.app"
+        }
+      ]
+    },
+    {
+      "source": "/dashboard/:path*",
+      "destination": "https://staging-app.glasspay.app/dashboard/:path*",
+      "permanent": false,
+      "has": [
+        {
+          "type": "host",
+          "value": "staging.glasspay.app"
+        }
+      ]
+    },
+    {
+      "source": "/member/:path*",
       "destination": "https://app.glasspay.app/member/:path*",
       "permanent": false
     },
-    { "source": "/invite", "destination": "https://app.glasspay.app/invite", "permanent": false },
-    { "source": "/invites", "destination": "https://app.glasspay.app/invites", "permanent": false },
-    { "source": "/sign-up", "destination": "https://app.glasspay.app/sign-up", "permanent": false },
-    { "source": "/sign-in", "destination": "https://app.glasspay.app/sign-in", "permanent": false },
+    {
+      "source": "/invite",
+      "destination": "https://app.glasspay.app/invite",
+      "permanent": false
+    },
+    {
+      "source": "/invites",
+      "destination": "https://app.glasspay.app/invites",
+      "permanent": false
+    },
+    {
+      "source": "/sign-up",
+      "destination": "https://app.glasspay.app/sign-up",
+      "permanent": false
+    },
+    {
+      "source": "/sign-in",
+      "destination": "https://app.glasspay.app/sign-in",
+      "permanent": false
+    },
     {
       "source": "/forgot-password",
       "destination": "https://app.glasspay.app/forgot-password",
@@ -39,7 +165,12 @@
       "permanent": false
     }
   ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -48,7 +179,10 @@
           "key": "Strict-Transport-Security",
           "value": "max-age=63072000; includeSubDomains; preload"
         },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
         {
           "key": "Content-Security-Policy",
           "value": "base-uri 'self'; object-src 'none'; form-action 'self'; frame-ancestors 'self' https://www.upwork.com https://upwork.com"
@@ -57,7 +191,10 @@
           "key": "Content-Security-Policy-Report-Only",
           "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self' https://www.upwork.com https://upwork.com; form-action 'self'; script-src 'self' https://client.crisp.chat; style-src 'self' 'unsafe-inline' https://client.crisp.chat; img-src 'self' data: blob: https://res.cloudinary.com; font-src 'self' data: https://client.crisp.chat; connect-src 'self' https://res.cloudinary.com https://*.ingest.sentry.io https://*.sentry.io https://va.vercel-scripts.com https://*.crisp.chat wss://*.relay.crisp.chat wss://*.relay.rescue.crisp.chat; frame-src 'self' https://client.crisp.chat; worker-src 'self' blob: https://*.crisp.chat; manifest-src 'self'; media-src 'self' blob:; upgrade-insecure-requests"
         },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
         {
           "key": "Permissions-Policy",
           "value": "camera=(), microphone=(self \"https://*.crisp.chat\"), geolocation=()"
@@ -66,17 +203,30 @@
     },
     {
       "source": "/assets/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/(.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.webp|.*\\.svg|.*\\.ico)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=604800, stale-while-revalidate=86400" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
       ]
     },
     {
       "source": "/(.*)\\.html",
-      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
     }
   ]
 }
