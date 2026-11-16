@@ -48,11 +48,21 @@ function cloudName() {
  * @param {number} [opts.dpr] - device pixel ratio (dpr_), e.g. 2 for retina
  * @param {string} [opts.crop] - crop mode (c_), default "limit" (never upscale)
  * @param {string} [opts.quality] - default "auto"
+ * @param {string} [opts.format] - output format (svg, webp, etc.) -> f_<format>
+ * @param {boolean} [opts.blur] - if true, adds low-quality blur placeholder (e_blur:1200, q_auto:low, w_32)
  */
 export function cldUrl(publicId, opts = {}) {
-  const { width, dpr, crop = "limit", quality = "auto" } = opts;
+  const { width, dpr, crop = "limit", quality = "auto", format, blur } = opts;
 
-  const parts = ["f_auto", `q_${quality}`, `c_${crop}`];
+  // Blur placeholder: tiny blurred image for LQIP
+  if (blur) {
+    return `https://res.cloudinary.com/${cloudName()}/image/upload/e_blur:1200,q_auto:low,w_32/${publicId}`;
+  }
+
+  // Explicit format overrides the default f_auto
+  const formatPart = format ? `f_${format}` : "f_auto";
+
+  const parts = [formatPart, `q_${quality}`, `c_${crop}`];
   if (width) parts.push(`w_${width}`);
   if (dpr) parts.push(`dpr_${dpr}`);
 
@@ -78,16 +88,15 @@ export const WIDTH_STEPS = [200, 400, 600, 800, 1000, 1200, 1600, 2000];
  * Build a Cloudinary video delivery URL.
  * @param {string} publicId - e.g. "glass/hero/dashboard-animation"
  * @param {object} [opts]
- * @param {string} [opts.format] - output format (mp4, webm, etc.)
+ * @param {string} [opts.format] - output format (mp4, webm, etc.) -> f_<format>, default "webm"
  * @param {number} [opts.width] - target width in px (w_)
  * @param {string} [opts.quality] - default "auto"
  */
 export function cldVideoUrl(publicId, opts = {}) {
-  const { format, width, quality = "auto" } = opts;
+  const { format = "webm", width, quality = "auto" } = opts;
 
-  const parts = ["f_auto", `q_${quality}`];
+  const parts = [`f_${format}`, `q_${quality}`];
   if (width) parts.push(`w_${width}`);
-  if (format) parts.push(`f_${format}`);
 
   return `https://res.cloudinary.com/${cloudName()}/video/upload/${parts.join(",")}/${publicId}`;
 }
