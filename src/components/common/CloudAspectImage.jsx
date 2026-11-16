@@ -32,6 +32,9 @@ import { cldUrl, cldSrcSet, widthsFor } from "../../lib/cloudinary";
  *   ("16 / 9", "563 / 303", ...) — reserves the image's space before the
  *   real image loads
  * @param {import("react").RefObject} [props.ref] - forwarded to the real <img>
+ * @param {string} [props.quality="auto"] - Cloudinary quality setting.
+ *   "auto" (default) uses q_auto balanced, "best" uses q_auto:best for max quality,
+ *   or a number like "80" for q_80.
  */
 export default function CloudAspectImage({
   publicId,
@@ -41,6 +44,7 @@ export default function CloudAspectImage({
   className = "",
   imgClassName = "",
   aspectRatio,
+  quality = "auto",
   ref: fwdRef,
   ...imgProps
 }) {
@@ -56,8 +60,8 @@ export default function CloudAspectImage({
     >
       <img
         ref={fwdRef}
-        src={cldUrl(publicId, { width })}
-        srcSet={cldSrcSet(publicId, widthsFor(width))}
+        src={cldUrl(publicId, { width, quality })}
+        srcSet={cldSrcSet(publicId, widthsFor(width), { quality })}
         sizes={sizes}
         alt={alt}
         decoding="async"
