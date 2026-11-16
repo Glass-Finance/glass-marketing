@@ -6,13 +6,17 @@
 //
 // publicId matches the upload script's scheme 1:1, e.g.:
 //   "glass/hero/hero"
-//   "glass/howItWorks/icon-signup"
+//   "glass/usecase/icon-schools"
+//
+// The upload script lives at scripts/upload-assets-to-cloudinary.mjs — it
+// walks src/assets and uploads every image to the same cloud, deriving
+// public ids from the relative path (see docs/cloudinary.md).
 
-// Read the cloud name lazily, not at module scope. Capturing it at import
-// time means Vitest's `stubEnv` (which runs after the module graph loads)
-// can never override it — the URL tests would read `undefined` in CI, where
-// no .env file exists. Reading on every call keeps dev, prod build and the
-// test suite consistent.
+// Read the cloud name lazily, not at module scope. Were it captured at import
+// time, Vitest's `stubEnv` (which runs after the module graph loads) could
+// never override it — the URL tests would read `undefined` in CI, where no
+// .env file exists. Reading on every call keeps dev, prod build and the test
+// suite consistent.
 function cloudName() {
   const name = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   if (!name) {
@@ -40,28 +44,19 @@ function cloudName() {
  * Build a Cloudinary delivery URL.
  * @param {string} publicId - e.g. "glass/hero/hero"
  * @param {object} [opts]
- * @param {"auto"|"svg"} [opts.format] - delivery format, default "auto"
  * @param {number} [opts.width] - target width in px (w_)
  * @param {number} [opts.dpr] - device pixel ratio (dpr_), e.g. 2 for retina
  * @param {string} [opts.crop] - crop mode (c_), default "limit" (never upscale)
  * @param {string} [opts.quality] - default "auto"
- * @param {boolean} [opts.blur] - low-quality blurred placeholder variant
  */
 export function cldUrl(publicId, opts = {}) {
-  const { format = "auto", width, dpr, crop = "limit", quality = "auto", blur = false } = opts;
+  const { width, dpr, crop = "limit", quality = "auto" } = opts;
 
-  const parts = [`f_${format}`, `q_${quality}`, `c_${crop}`];
+  const parts = ["f_auto", `q_${quality}`, `c_${crop}`];
   if (width) parts.push(`w_${width}`);
   if (dpr) parts.push(`dpr_${dpr}`);
-  if (blur) parts.push("e_blur:1200", "q_auto:low", "w_32");
 
   return `https://res.cloudinary.com/${cloudName()}/image/upload/${parts.join(",")}/${publicId}`;
-}
-
-/** Build a Cloudinary video delivery URL. */
-export function cldVideoUrl(publicId, opts = {}) {
-  const { format = "webm", quality = "auto" } = opts;
-  return `https://res.cloudinary.com/${cloudName()}/video/upload/f_${format},q_${quality}/${publicId}`;
 }
 
 /**
@@ -72,4 +67,40 @@ export function cldVideoUrl(publicId, opts = {}) {
  */
 export function cldSrcSet(publicId, widths, opts = {}) {
   return widths.map((w) => `${cldUrl(publicId, { ...opts, width: w })} ${w}w`).join(", ");
+}
+
+// Standard width buckets used to derive a responsive srcSet from a single
+// `width` (see CloudImage.jsx). Kept here so CloudImage.jsx and any tests
+// can share one source of truth.
+export const WIDTH_STEPS = [200, 400, 600, 800, 1000, 1200, 1600, 2000];
+
+/**
+ * Build a Cloudinary video delivery URL.
+ * @param {string} publicId - e.g. "glass/hero/dashboard-animation"
+ * @param {object} [opts]
+ * @param {string} [opts.format] - output format (mp4, webm, etc.)
+ * @param {number} [opts.width] - target width in px (w_)
+ * @param {string} [opts.quality] - default "auto"
+ */
+export function cldVideoUrl(publicId, opts = {}) {
+  const { format, width, quality = "auto" } = opts;
+
+  const parts = ["f_auto", `q_${quality}`];
+  if (width) parts.push(`w_${width}`);
+  if (format) parts.push(`f_${format}`);
+
+  return `https://res.cloudinary.com/${cloudName()}/video/upload/${parts.join(",")}/${publicId}`;
+}
+
+/**
+ * Convert a target render width into the srcSet widths to serve: every
+ * standard bucket up to 2x the target (retina headroom), plus the exact
+ * target so 1x displays stay crisp.
+ * @param {number} targetWidth
+ * @returns {number[]}
+ */
+export function widthsFor(targetWidth) {
+  const steps = WIDTH_STEPS.filter((w) => w <= targetWidth * 2);
+  if (!steps.includes(targetWidth)) steps.push(targetWidth);
+  return [...new Set(steps)].sort((a, b) => a - b);
 }
