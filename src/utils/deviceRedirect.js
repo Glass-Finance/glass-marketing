@@ -48,7 +48,7 @@ export const APP_ORIGIN = import.meta.env.VITE_APP_URL ?? "https://app.glasspay.
 // ── Marketing / app domain separation ────────────────────────────────────────
 // glasspay.app + www serve the marketing site only; the application lives on
 // APP_ORIGIN (app.glasspay.app in production).
-const MARKETING_HOSTS = new Set(["glasspay.app", "www.glasspay.app"]);
+const MARKETING_HOSTS = new Set(["glasspay.app", "www.glasspay.app", "staging.glasspay.app"]);
 
 function isAppOriginSeparate() {
   try {
