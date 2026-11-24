@@ -124,7 +124,7 @@ export default function Hero() {
         >
           <Reveal variant="up" delay={80}>
             <h1 className="mx-auto mb-7 max-w-[885px] text-center text-[clamp(30px,6vw,64px)] font-bold leading-[1.05] tracking-tight text-white sm:mb-8">
-              Manage Community Payments Effortlessly
+              Collect dues. Track payments. Manage members.
             </h1>
           </Reveal>
           <Reveal variant="up" delay={160}>
@@ -151,7 +151,7 @@ export default function Hero() {
                   e.currentTarget.style.boxShadow = "";
                 }}
               >
-                Create Your Community
+                Set Up Your Organization
                 <motion.span
                   animate={{ x: [0, 5, 0] }}
                   transition={{
