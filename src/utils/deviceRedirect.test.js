@@ -115,6 +115,30 @@ describe("isMarketingHost / goToApp", () => {
     expect(isMarketingHost()).toBe(true);
   });
 
+  it("recognizes the staging marketing host", () => {
+    setHostname("staging.glasspay.app");
+    expect(isMarketingHost()).toBe(true);
+  });
+
+  it("sends staging marketing visitors to the configured staging app", async () => {
+    setHostname("staging.glasspay.app");
+    vi.stubEnv("VITE_APP_URL", "https://staging-app.glasspay.app");
+    vi.resetModules();
+    try {
+      const staging = await import("./deviceRedirect");
+      const navigate = vi.fn();
+      staging.goToApp("/sign-up", navigate);
+      expect(navigate).not.toHaveBeenCalled();
+      expect(window.location.href).toBe("https://staging-app.glasspay.app/sign-up");
+      expect(staging.buildMobileUrl("/member/join")).toBe(
+        "https://staging-app.glasspay.app/member/join",
+      );
+    } finally {
+      vi.unstubAllEnvs();
+      vi.resetModules();
+    }
+  });
+
   it("goToApp hard-navigates when on the marketing host", () => {
     setHostname("glasspay.app");
     const navigate = vi.fn();

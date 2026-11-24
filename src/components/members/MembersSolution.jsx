@@ -1,75 +1,66 @@
-import { cldUrl, cldSrcSet } from "../../lib/cloudinary";
 import SolutionSection from "../common/SolutionSection";
+import { ClickPayIcon, BellIcon, ReceiptIcon } from "../common/SolutionIcons";
 
-const ICON_WIDTHS = [50, 100, 150];
-const ILLUS_WIDTHS = [400, 800, 1200, 1600];
-const icon1 = {
-  src: cldUrl("glass/icon/frame1", { width: 100 }),
-  srcSet: cldSrcSet("glass/icon/frame1", ICON_WIDTHS),
-};
-const icon2 = {
-  src: cldUrl("glass/icon/frame2", { width: 100 }),
-  srcSet: cldSrcSet("glass/icon/frame2", ICON_WIDTHS),
-};
-const icon3 = {
-  src: cldUrl("glass/icon/frame3", { width: 100 }),
-  srcSet: cldSrcSet("glass/icon/frame3", ICON_WIDTHS),
-};
-const icon4 = {
-  src: cldUrl("glass/icon/frame4", { width: 100 }),
-  srcSet: cldSrcSet("glass/icon/frame4", ICON_WIDTHS),
-};
-const featurePayment = {
-  src: cldUrl("glass/solution/payment", { width: 800, format: "svg" }),
-  srcSet: cldSrcSet("glass/solution/payment", ILLUS_WIDTHS, { format: "svg" }),
-};
-const featureReminder = {
-  src: cldUrl("glass/solution/reminder", { width: 800, format: "svg" }),
-  srcSet: cldSrcSet("glass/solution/reminder", ILLUS_WIDTHS, { format: "svg" }),
-};
-const featureHistory = {
-  src: cldUrl("glass/solution/payment-history", { width: 800, format: "svg" }),
-  srcSet: cldSrcSet("glass/solution/payment-history", ILLUS_WIDTHS, { format: "svg" }),
-};
-const featureInstant = {
-  src: cldUrl("glass/solution/instant", { width: 800, format: "svg" }),
-  srcSet: cldSrcSet("glass/solution/instant", ILLUS_WIDTHS, { format: "svg" }),
-};
-
+// Copy, icons and artwork follow the Figma "members" solution frame.
+// See OurSolution.jsx for the illustration field contract.
 const features = [
   {
-    icon: icon2,
-    title: "One-Click Payments",
-    desc: "Pay your dues in seconds from any device. No more manual transfers.",
-    illustration: featurePayment,
-    illustrationBackground: true,
+    Icon: ClickPayIcon,
+    title: "Make Payments With Ease",
+    desc: ["Pay your dues in seconds from any device.", "No more manual transfers."],
+    illustration: {
+      publicId: "glass/solution/member-pay",
+      width: 705,
+      left: 99.5,
+      w: 352.5,
+      h: 205.5,
+    },
   },
   {
-    icon: icon1,
-    title: "Smart Reminders",
-    desc: "Get reminders via SMS, WhatsApp, and Email so you never miss a deadline.",
-    illustration: featureReminder,
+    Icon: BellIcon,
+    title: "Never Miss A Due Date",
+    desc: ["Get reminders via SMS, WhatsApp, and Email so you", "never miss a deadline."],
+    illustration: {
+      publicId: "glass/solution/member-reminders",
+      width: 784,
+      left: 98.5,
+      w: 392,
+      h: 208.5,
+    },
   },
   {
-    icon: icon3,
+    Icon: ReceiptIcon,
     title: "Easy Access To Your Payment History",
-    desc: "Easily track past payments.",
-    illustration: featureHistory,
+    desc: "Easily Track Past Payments.",
+    illustration: {
+      publicId: "glass/solution/member-history",
+      width: 704,
+      left: 156,
+      w: 352,
+      h: 211.5,
+    },
   },
   {
-    icon: icon4,
+    Icon: ReceiptIcon,
     title: "Generate Instant Proof",
     desc: "Download official receipts immediately after paying.",
-    illustration: featureInstant,
+    illustration: {
+      publicId: "glass/solution/member-receipt",
+      width: 432,
+      left: 172,
+      w: 216,
+      h: 237.5,
+    },
   },
 ];
 
 export default function MembersSolution() {
   return (
     <SolutionSection
+      variant="members"
       headline="Everything You Need to Pay with Confidence"
       subtext="One tap to pay, instant receipts, and a full history — so you never have to dig through chats again."
-      subtextMaxWidth={600}
+      subtextMaxWidth="600px"
       features={features}
     />
   );
