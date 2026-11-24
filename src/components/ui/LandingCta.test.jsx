@@ -26,7 +26,7 @@ describe("LandingCta — design system conformance", () => {
   });
 
   it("uses the near-white fill with a black label, not the primary blue", () => {
-    render(<LandingCta>Create Your Community</LandingCta>);
+    render(<LandingCta>Set Up Your Organization</LandingCta>);
     const cls = screen.getByRole("button").className;
     expect(cls).toContain("bg-[#fafbfc]");
     expect(cls).toContain("text-black");

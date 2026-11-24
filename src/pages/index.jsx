@@ -17,7 +17,7 @@ import Footer from "../components/Footer";
 
 export default function OrganizationsHome() {
   useSeoMeta({
-    title: "Manage Community Payments Effortlessly",
+    title: "Collect dues. Track payments. Manage members.",
     description:
       "Stop chasing dues in group chats. Glasspay lets Nigerian associations, clubs, and schools collect, track, and manage community funds in one place.",
     path: "/",

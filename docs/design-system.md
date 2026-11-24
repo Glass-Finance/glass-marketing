@@ -231,12 +231,12 @@ Critical's X-large uses `20/24/20/24` (h=64) — narrower horizontally than Prim
 > The six roles in §2.1 are **product** buttons. The Figma landing frames (MacBook Air 3–8,
 > Home Page section) draw their CTAs differently, confirmed node-by-node 2026-10-10:
 >
-> | Property | Value                      | Evidence                                      |
-> | -------- | -------------------------- | --------------------------------------------- |
-> | Fill     | `#fafbfc` (near-white)     | every "Get Started" / "Create Your Community" |
-> | Radius   | 60 → pill (`rounded-full`) | r=60 on all instances                         |
-> | Height   | 50 — **42 in the navbar**  | 50 on all instances; navbar is the exception  |
-> | Label    | Inter 500, 15px, `#000000` | text nodes                                    |
+> | Property | Value                      | Evidence                                         |
+> | -------- | -------------------------- | ------------------------------------------------ |
+> | Fill     | `#fafbfc` (near-white)     | every "Get Started" / "Set Up Your Organization" |
+> | Radius   | 60 → pill (`rounded-full`) | r=60 on all instances                            |
+> | Height   | 50 — **42 in the navbar**  | 50 on all instances; navbar is the exception     |
+> | Label    | Inter 500, 15px, `#000000` | text nodes                                       |
 >
 > These are **not** an inversion of Primary and must not be styled via `variant="primary"`.
 > They are their own treatment: near-white pill on the brand-navy sections (and on light
@@ -245,8 +245,8 @@ Critical's X-large uses `20/24/20/24` (h=64) — narrower horizontally than Prim
 > owner rules.
 >
 > **Scope — exactly these sites** (v1 marketing + the app repo's marketing twins):
-> nav "Get Started Free" (desktop + mobile), CTA-section "Create Your Community" /
-> "Join Your Community", hero "Create Your Community" / "Join A Community", footer
+> nav "Get Started Free" (desktop + mobile), CTA-section "Set Up Your Organization" /
+> "Join Your Community", hero "Set Up Your Organization" / "Join A Community", footer
 > "Get Started Free". Implementation is the shared `ui/LandingCta` component — do not
 > hand-roll the styles at a call site. **Product surfaces (dashboard, auth, member app)
 > never use it.** The **members-view** navbar "Sign In" also uses it (owner decision,
