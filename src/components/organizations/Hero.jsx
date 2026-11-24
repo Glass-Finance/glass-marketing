@@ -119,7 +119,7 @@ export default function Hero() {
         </div>
 
         <div
-          className="relative z-10 w-full max-w-[720px] mx-auto text-center px-6 pb-[65px] sm:pb-8"
+          className="relative z-10 w-full max-w-[900px] mx-auto text-center px-6 pb-[65px] sm:pb-8"
           style={{ fontFamily: "Inter,-apple-system,sans-serif" }}
         >
           <Reveal variant="up" delay={80}>
