@@ -123,11 +123,20 @@ export default function Footer() {
             before; text bumped to 14px (15px from sm) throughout. */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-10 mb-12">
           {Object.entries(links).map(([section, items]) => (
-            <div key={section} className={section === "Social" ? "flex flex-col items-end" : undefined}>
+            <div
+              key={section}
+              className={section === "Social" ? "flex flex-col items-end" : undefined}
+            >
               {section !== "Social" && (
                 <p className="text-[14px] sm:text-[15px] font-bold text-white mb-4">{section}</p>
               )}
-              <ul className={section === "Social" ? "flex gap-2 list-none p-0 m-0 justify-end" : "space-y-3 sm:space-y-2.5 list-none p-0 m-0"}>
+              <ul
+                className={
+                  section === "Social"
+                    ? "flex gap-2 list-none p-0 m-0 justify-end"
+                    : "space-y-3 sm:space-y-2.5 list-none p-0 m-0"
+                }
+              >
                 {items.map(({ label, href, target, rel, Icon, ariaLabel, chat }) => (
                   <li key={label}>
                     {href ? (
@@ -136,7 +145,11 @@ export default function Footer() {
                         target={target}
                         rel={rel}
                         onClick={chat ? openChat : undefined}
-                        className={Icon ? "flex items-center justify-center p-2 rounded-g-1 hover:bg-white/10 transition-colors" : "text-[13px] text-white/60 hover:text-white no-underline transition-colors"}
+                        className={
+                          Icon
+                            ? "flex items-center justify-center p-2 rounded-g-1 hover:bg-white/10 transition-colors"
+                            : "text-[13px] text-white/60 hover:text-white no-underline transition-colors"
+                        }
                         aria-label={ariaLabel}
                       >
                         {Icon ? <Icon className="h-5 w-5 text-white" /> : label}
@@ -157,8 +170,18 @@ export default function Footer() {
         <div className="flex gap-3 mb-6 justify-center">
           {[
             { label: "X", href: "https://x.com/glasspayhq", Icon: X, ariaLabel: "X (Twitter)" },
-            { label: "Instagram", href: "https://www.instagram.com/glasspayhq", Icon: Instagram, ariaLabel: "Instagram" },
-            { label: "LinkedIn", href: "https://ng.linkedin.com/company/glass-finance", Icon: Linkedin, ariaLabel: "LinkedIn" },
+            {
+              label: "Instagram",
+              href: "https://www.instagram.com/glasspayhq",
+              Icon: Instagram,
+              ariaLabel: "Instagram",
+            },
+            {
+              label: "LinkedIn",
+              href: "https://ng.linkedin.com/company/glass-finance",
+              Icon: Linkedin,
+              ariaLabel: "LinkedIn",
+            },
           ].map(({ label, href, Icon, ariaLabel }) => (
             <a
               key={label}
