@@ -1,206 +1,176 @@
-import { useEffect, useRef } from "react";
-import { CheckCircle, Phone, Mail, Edit3, MoreHorizontal } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
-const claims = [
-  {
-    id: "transparency",
-    title: "Transparency",
-    description: "Every fee is shown before you pay. Your community always receives the full due.",
-  },
-  {
-    id: "privacy",
-    title: "Data Privacy",
-    description: "Your rights: access, correction, and deletion are set out in our Privacy Policy.",
-  },
-  {
-    id: "encryption",
-    title: "End-to-End Encryption",
-    description: "Sensitive fields use column-level AES-256 encryption.",
-  },
-];
+/* Step timings (ms) per stage — mirrors the PLANS table in the reference HTML. */
+const PLANS = {
+  fees: [3000, 2600],
+  data: [2200, 1800, 2200, 2200],
+  enc: [2800, 3400],
+};
 
-/* ── Transparency card: payment breakdown mockup ── */
-function TransparencyMockup() {
+const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghkmnpqrstuvwxyz0123456789#$@!%&";
+
+/* ── Scene 1: No Hidden Fees ── */
+function FeesStage({ step }) {
   return (
-    <div className="security-transparency relative w-full max-w-[320px]">
-      {/* State 1: Payment Breakdown */}
-      <div className="state-breakdown rounded-[12px] bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-        <h4 className="mb-3 text-[15px] font-semibold text-black">Payment Breakdown</h4>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-[14px]">
-            <span className="text-black/60">Community dues:</span>
-            <span className="font-medium text-black">₦5,000.00</span>
+    <div className="st-stage" data-stage="fees" data-step={step} aria-hidden="true">
+      <div className="st-frame">
+        <div className="st-panel" style={{ minHeight: 92 }}>
+          <div className={`st-layer st-fees ${step === 0 ? "on" : ""}`} data-on="0">
+            <h4>Payment Breakdown</h4>
+            <div className="st-row">
+              <span>Community dues:</span>
+              <b>₦5,000.00</b>
+            </div>
+            <div className="st-row">
+              <span>Transaction Fee:</span>
+              <b>₦50.00</b>
+            </div>
           </div>
-          <div className="flex items-center justify-between text-[14px]">
-            <span className="text-black/60">Transaction Fee:</span>
-            <span className="font-medium text-black">₦50.00</span>
+          <div
+            className={`st-layer is-abs ${step === 1 ? "on" : ""}`}
+            data-on="1"
+            style={{ padding: "0 14px" }}
+          >
+            <div className={`st-toast ${step === 1 ? "on" : ""}`}>
+              <i /> Community Receives ₦5,000.00
+            </div>
           </div>
-        </div>
-      </div>
-
-      {/* State 2: Community Receives */}
-      <div className="state-received absolute inset-0 flex items-center justify-center">
-        <div className="flex items-center gap-2 rounded-[8px] bg-[#ccffcc] px-4 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <CheckCircle className="size-5 text-green-600" strokeWidth={2.5} />
-          <span className="text-[14px] font-medium text-black">Community Receives ₦5,000.00</span>
         </div>
       </div>
     </div>
   );
 }
 
-/* ── Data Privacy card: member editing mockup ── */
-function DataPrivacyMockup() {
+/* ── Scene 2: Data Rights ── */
+function DataStage({ step }) {
   return (
-    <div className="security-privacy relative w-full max-w-[320px]">
-      {/* State 1: Profile with phone number */}
-      <div className="state-profile rounded-[12px] bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-        <div className="flex items-center gap-3">
-          <div className="size-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600" />
-          <div className="flex-1">
-            <div className="text-[14px] font-semibold text-black">Tunde Adegbite</div>
-            <div className="text-[12px] text-black/50">Member</div>
+    <div className="st-stage" data-stage="data" data-step={step} aria-hidden="true">
+      <div className="st-frame">
+        <div className="st-panel" style={{ minHeight: 112 }}>
+          <div className={`st-layer ${step <= 2 ? "on" : ""}`} data-on="0,1,2">
+            <div className="st-person">
+              <img
+                className="st-avatar"
+                src="/profile-2.svg"
+                alt=""
+                width={44}
+                height={44}
+                onError={(e) => {
+                  e.currentTarget.replaceWith(
+                    Object.assign(document.createElement("div"), {
+                      className: "st-avatar",
+                      textContent: "TA",
+                    }),
+                  );
+                }}
+              />
+              <div>
+                <strong>Tunde Adegbite</strong>
+                <small>Member</small>
+              </div>
+              <div className="st-act">
+                <div className="st-more">…</div>
+                <div className="st-edit">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4 20h4L19 9a2.8 2.8 0 00-4-4L4 16v4zM13.5 6.5l4 4" />
+                  </svg>
+                  Edit
+                </div>
+              </div>
+            </div>
+            <div className="st-rule" />
+            <div className="st-field">
+              <div className="st-f-phone">
+                <small>Phone Number</small>
+                <span>0803 000 5678</span>
+                <em className="st-badge" style={{ fontStyle: "normal" }}>
+                  Updated
+                </em>
+              </div>
+              <div className="st-f-email">
+                <small>Email</small>
+                <span>sulai**m@gmail.com</span>
+              </div>
+            </div>
+            <div className="st-menu">
+              <div>
+                <svg viewBox="0 0 24 24">
+                  <path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z" />
+                </svg>
+                Phone Number
+              </div>
+              <div>
+                <svg viewBox="0 0 24 24">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="M3 7l9 6 9-6" />
+                </svg>
+                Email
+              </div>
+            </div>
           </div>
-          <MoreHorizontal className="size-5 text-black/40" />
+          <div
+            className={`st-layer is-abs ${step === 3 ? "on" : ""}`}
+            data-on="3"
+            style={{ padding: "0 14px" }}
+          >
+            <div className={`st-toast ${step === 3 ? "on" : ""}`}>
+              <i /> Phone Number Updated!
+            </div>
+          </div>
         </div>
-        <div className="mt-3 border-t border-black/5 pt-3">
-          <div className="text-[12px] text-black/50">Phone Number</div>
-          <div className="flex items-center justify-between">
-            <span className="text-[15px] font-medium text-black">0803 000 5678</span>
-            <span className="security-badge-pulse rounded-[4px] bg-[#ccffcc] px-2 py-0.5 text-[11px] font-medium text-green-700">
-              Updated
+      </div>
+    </div>
+  );
+}
+
+/* ── Scene 3: Encryption ── */
+function EncStage({ step, scrValues }) {
+  return (
+    <div className="st-stage" data-stage="enc" data-step={step} aria-hidden="true">
+      <div className="st-frame">
+        <div className="st-panel st-enc" style={{ minHeight: 112 }}>
+          <div className={`st-layer ${step === 0 ? "on" : ""}`} data-on="0">
+            <h4>Member Information</h4>
+            <div className="st-rule" />
+            <span className="st-lbl">Email:</span>
+            <span className="st-val">sulai**m@gmail.com</span>
+            <span className="st-lbl">Phone Number:</span>
+            <span className="st-val">0803 000 5678</span>
+          </div>
+          <div
+            className={`st-layer is-abs ${step === 1 ? "on" : ""}`}
+            data-on="1"
+            style={{ padding: "12px 14px" }}
+          >
+            <h4>Protected Information</h4>
+            <div className="st-rule" />
+            <span className="st-val" style={{ marginTop: 10 }}>
+              {scrValues[0]}
+            </span>
+            <span className="st-val" style={{ marginTop: 10 }}>
+              {scrValues[1]}
             </span>
           </div>
-        </div>
-      </div>
-
-      {/* State 2: Dropdown with edit options */}
-      <div className="state-dropdown absolute inset-0 flex items-center justify-center">
-        <div className="rounded-[12px] bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600" />
-            <div className="flex-1">
-              <div className="text-[14px] font-semibold text-black">Tunde Adegbite</div>
-              <div className="text-[12px] text-black/50">Member</div>
-            </div>
-            <div className="flex items-center gap-1 text-[13px] font-medium text-blue-600">
-              <Edit3 className="size-3" />
-              Edit
-            </div>
-          </div>
-          <div className="mt-3 border-t border-black/5 pt-3">
-            <div className="text-[12px] text-black/50">Email</div>
-            <div className="text-[15px] font-medium text-black">sulai**m@gmail.com</div>
-          </div>
-          <div className="mt-3 flex gap-2">
-            <div className="flex items-center gap-1.5 rounded-[6px] border border-black/10 px-3 py-1.5 text-[13px] text-black/70">
-              <Phone className="size-3" />
-              Phone Number
-            </div>
-            <div className="flex items-center gap-1.5 rounded-[6px] border border-black/10 px-3 py-1.5 text-[13px] text-black/70">
-              <Mail className="size-3" />
-              Email
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* State 3: Toast notification */}
-      <div className="state-toast absolute inset-0 flex items-center justify-center">
-        <div className="security-toast-enter flex items-center gap-2 rounded-[8px] bg-[#ccffcc] px-4 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-          <CheckCircle className="size-5 text-green-600" strokeWidth={2.5} />
-          <span className="text-[14px] font-medium text-black">Phone Number Updated!</span>
-        </div>
-      </div>
-
-      {/* State 4: Member Information */}
-      <div className="state-member-info absolute inset-0 flex items-center justify-center">
-        <div className="w-full rounded-[12px] bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-          <div className="text-[14px] font-semibold text-black">Member Information</div>
-          <div className="mt-3 space-y-2 border-t border-black/5 pt-3">
-            <div>
-              <div className="text-[12px] text-black/50">Email:</div>
-              <div className="text-[14px] font-medium text-black">sulai**m@gmail.com</div>
-            </div>
-            <div>
-              <div className="text-[12px] text-black/50">Phone Number:</div>
-              <div className="text-[14px] font-medium text-black">0803 000 5678</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* State 5: Protected Information */}
-      <div className="state-protected absolute inset-0 flex items-center justify-center">
-        <div className="w-full rounded-[12px] bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-          <div className="text-[14px] font-semibold text-black">Protected Information</div>
-          <div className="mt-3 space-y-2 border-t border-black/5 pt-3">
-            <div className="text-[14px] font-medium text-black">a8F#2kP9@zQ4</div>
-            <div className="text-[14px] font-medium text-black">X7$mL3fvR0pB</div>
-          </div>
+          <span className="st-sweep" />
         </div>
       </div>
     </div>
   );
 }
 
-/* ── Encryption card: member info → encrypted transition ── */
-function EncryptionMockup() {
+/* ── Card wrapper ── */
+function StCard({ children, icon, title, description }) {
   return (
-    <div className="security-encryption relative w-full max-w-[320px]">
-      {/* State 1: Member Information */}
-      <div className="state-member rounded-[12px] bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-        <div className="text-[14px] font-semibold text-black">Member Information</div>
-        <div className="mt-3 space-y-2 border-t border-black/5 pt-3">
-          <div>
-            <div className="text-[12px] text-black/50">Email:</div>
-            <div className="text-[14px] font-medium text-black">sulai**m@gmail.com</div>
-          </div>
-          <div>
-            <div className="text-[12px] text-black/50">Phone Number:</div>
-            <div className="text-[14px] font-medium text-black">0803 000 5678</div>
-          </div>
+    <article className="st-card">
+      {children}
+      <div className="st-body">
+        <svg className="st-icon" viewBox="0 0 24 24" aria-hidden="true">
+          {icon}
+        </svg>
+        <div>
+          <h3>{title}</h3>
+          <p>{description}</p>
         </div>
-      </div>
-
-      {/* State 2: Protected/Encrypted Information */}
-      <div className="state-encrypted absolute inset-0 flex items-center justify-center">
-        <div className="w-full rounded-[12px] bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-          <div className="text-[14px] font-semibold text-black">Protected Information</div>
-          <div className="mt-3 space-y-2 border-t border-black/5 pt-3">
-            <div className="text-[14px] font-medium text-black">a8F#2kP9@zQ4</div>
-            <div className="text-[14px] font-medium text-black">X7$mL3fvR0pB</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Purple glow effect */}
-      <div className="security-glow" aria-hidden="true" />
-    </div>
-  );
-}
-
-/* ── Card renderer ── */
-function SecurityCard({ claim, index }) {
-  const MockupComponent =
-    claim.id === "transparency"
-      ? TransparencyMockup
-      : claim.id === "privacy"
-        ? DataPrivacyMockup
-        : EncryptionMockup;
-
-  return (
-    <article
-      className={`security-card-bg flex w-full max-w-[400px] flex-col items-center rounded-[20px] border border-black/5 p-6 transition-transform duration-700 ${index === 0 ? "security-card-tilt-left" : index === 2 ? "security-card-tilt-right" : ""}`}
-    >
-      <div className="flex min-h-[280px] w-full items-center justify-center">
-        <MockupComponent />
-      </div>
-      <div className="mt-6 text-center">
-        <h3 className="mb-2 text-[20px] font-semibold text-brand-navy">{claim.title}</h3>
-        <p className="mx-auto max-w-[300px] text-[15px] leading-relaxed text-black/60">
-          {claim.description}
-        </p>
       </div>
     </article>
   );
@@ -208,82 +178,193 @@ function SecurityCard({ claim, index }) {
 
 export default function SecurityCards({ showTribuneBanner = false }) {
   const rootRef = useRef(null);
+  const [feesStep, setFeesStep] = useState(0);
+  const [dataStep, setDataStep] = useState(0);
+  const [encStep, setEncStep] = useState(0);
+  const [scrValues, setScrValues] = useState(["a8F#2kP9@zQ4", "X7$mL3!vR0pB"]);
+  const timersRef = useRef([]);
+  const scrambleRef = useRef([]);
+
+  /* Text-scramble: reveals characters left-to-right over ~22 ticks. */
+  const scramble = () => {
+    scrambleRef.current.forEach((intervalId) => clearInterval(intervalId));
+    scrambleRef.current = ["a8F#2kP9@zQ4", "X7$mL3!vR0pB"].map((fin, k) => {
+      let t = 0;
+      const total = 22;
+      return setInterval(() => {
+        t += 1;
+        const reveal = Math.floor((Math.max(0, t - 6 - k * 3) / (total - 6)) * fin.length);
+        let out = "";
+        for (let i = 0; i < fin.length; i++) {
+          out += i < reveal ? fin[i] : CHARS[Math.floor(Math.random() * CHARS.length)];
+        }
+        setScrValues((prev) => {
+          const next = [...prev];
+          next[k] = t >= total + k * 3 ? fin : out;
+          return next;
+        });
+        if (t >= total + k * 3) {
+          clearInterval(scrambleRef.current[k]);
+        }
+      }, 45);
+    });
+  };
+
+  /* Cycle a single stage through its plan, then loop. */
+  const runCycle = (plan, setter, onStep) => {
+    let i = 0;
+    const tick = () => {
+      const timer = setTimeout(() => {
+        i = (i + 1) % plan.length;
+        setter(i);
+        if (onStep) onStep(i);
+        tick();
+      }, plan[i]);
+      timersRef.current.push(timer);
+    };
+    tick();
+  };
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return undefined;
 
-    // Trigger animations when cards scroll into view
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return undefined;
+
+    const clearAll = () => {
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current = [];
+      scrambleRef.current.forEach(clearInterval);
+      scrambleRef.current = [];
+    };
+
+    const startAll = () => {
+      clearAll();
+      setFeesStep(0);
+      setDataStep(0);
+      setEncStep(0);
+      setScrValues(["a8F#2kP9@zQ4", "X7$mL3!vR0pB"]);
+      runCycle(PLANS.fees, setFeesStep);
+      runCycle(PLANS.data, setDataStep);
+      runCycle(PLANS.enc, setEncStep, (i) => {
+        if (i === 1) scramble();
+      });
+    };
+
+    let observer;
     if ("IntersectionObserver" in window) {
-      const observer = new IntersectionObserver(
+      observer = new IntersectionObserver(
         (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("animate-in");
-              observer.unobserve(entry.target);
-            }
-          });
+          if (entries[0].isIntersecting) {
+            startAll();
+            observer.disconnect();
+          }
         },
-        { threshold: 0.3 },
+        { threshold: 0.4 },
       );
-
-      const cards = root.querySelectorAll(".security-card-bg");
-      cards.forEach((card) => observer.observe(card));
-
-      return () => observer.disconnect();
+      const firstStage = root.querySelector(".st-stage");
+      if (firstStage) observer.observe(firstStage);
+    } else {
+      startAll();
     }
 
-    return undefined;
+    return () => {
+      clearAll();
+      if (observer) observer.disconnect();
+    };
   }, []);
 
   return (
-    <section
-      ref={rootRef}
-      className="relative isolate overflow-hidden py-20 md:py-28"
-      id="security"
-    >
-      <div className="relative z-10 mx-auto max-w-[1200px] px-6">
-        <header className="mb-8 text-center md:mb-16">
-          <div className="mb-[clamp(16px,4vw,28px)] flex justify-center">
-            <span className="inline-flex items-center rounded-full border border-brand-navy/25 px-5 py-2 text-[13px] font-medium text-brand-navy">
-              Security &amp; Trust
-            </span>
-          </div>
-          <h2 className="mx-auto mb-4 max-w-[1080px] text-[clamp(32px,5.5vw,58px)] font-bold leading-tight tracking-tight text-brand-navy">
-            Built on Trust, Secured by Design
-          </h2>
-          <p className="mx-auto max-w-[700px] text-[17px] leading-relaxed text-black/60">
-            Transparency, privacy, and encryption are built into every transaction.
-          </p>
-        </header>
+    <section ref={rootRef} className="mx-auto max-w-[1240px] px-6 py-[72px] md:py-14" id="security">
+      {/* ── Header ── */}
+      <header className="text-center">
+        <span className="st-pill">Security &amp; Trust</span>
+        <h2 className="mx-auto mb-4 mt-7 max-w-[900px] text-[clamp(34px,6vw,64px)] font-extrabold leading-[1.05] tracking-[-0.03em] text-[#0a1a6e]">
+          Security for your peace of mind
+        </h2>
+        <p className="st-sub">
+          Clear payment terms, data rights, and encryption for sensitive fields.
+        </p>
+      </header>
 
-        <div className="grid grid-cols-1 justify-items-center gap-8 md:grid-cols-2 xl:grid-cols-3 xl:gap-4">
-          {claims.map((claim, index) => (
-            <SecurityCard key={claim.title} claim={claim} index={index} />
-          ))}
-        </div>
+      {/* ── Cards ── */}
+      <div className="st-grid">
+        <StCard
+          icon={
+            <>
+              <path
+                d="M12 5C6.5 5 2.7 9 1.5 12c1.2 3 5 7 10.5 7s9.3-4 10.5-7C21.3 9 17.5 5 12 5z"
+                fill="currentColor"
+              />
+              <circle cx="12" cy="12" r="3.6" fill="#fff" />
+              <circle cx="12" cy="12" r="1.8" fill="currentColor" />
+            </>
+          }
+          title="No Hidden Fees"
+          description="See every fee upfront. Your community receives the full due."
+        >
+          <FeesStage step={feesStep} />
+        </StCard>
 
-        {showTribuneBanner ? (
-          <aside className="mt-10 flex flex-wrap items-center justify-between gap-6 rounded-g-1 border border-[#002fa7]/20 bg-[#ccdaff] px-6 py-4 xl:mt-[70px]">
-            <div>
-              <h3 className="mb-1 text-[18px] font-normal leading-7 text-black">
-                Why the Nigerian Tribune is Talking About Glass
-              </h3>
-              <p className="text-[16px] leading-6 text-black/60">
-                Discover how Glass is redefining community finances.
-              </p>
-            </div>
-            <a
-              href="https://tribuneonlineng.com/team-glass-shines-as-winner-of-5th-babcock-innovation-challenge/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-[50px] shrink-0 items-center justify-center rounded-g-1 border border-black px-6 py-3 text-[16px] font-medium leading-6 text-brand no-underline transition-colors hover:bg-black/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-            >
-              Read Full Story
-            </a>
-          </aside>
-        ) : null}
+        <StCard
+          icon={
+            <>
+              <path d="M12 2l8 3v6c0 5-3.4 9.2-8 11-4.6-1.8-8-6-8-11V5l8-3z" fill="currentColor" />
+              <path
+                d="M8.5 12l2.5 2.5 4.5-5"
+                fill="none"
+                stroke="#fff"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </>
+          }
+          title="Data Rights"
+          description="Access, correct or request deletion of your data."
+        >
+          <DataStage step={dataStep} />
+        </StCard>
+
+        <StCard
+          icon={
+            <>
+              <rect x="4.5" y="10" width="15" height="11" rx="3" fill="currentColor" />
+              <path
+                d="M8 10V7.5a4 4 0 018 0V10"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+              />
+              <circle cx="12" cy="15.5" r="1.5" fill="#fff" />
+            </>
+          }
+          title="Encryption"
+          description="All data and transactions are encrypted. Your records are private."
+        >
+          <EncStage step={encStep} scrValues={scrValues} />
+        </StCard>
       </div>
+
+      {/* ── Tribune banner ── */}
+      {showTribuneBanner ? (
+        <div className="st-banner">
+          <div>
+            <strong>Why the Nigerian Tribune is Talking About Glass</strong>
+            <span>Discover how Glass is redefining community finances.</span>
+          </div>
+          <a
+            className="st-btn"
+            href="https://tribuneonlineng.com/team-glass-shines-as-winner-of-5th-babcock-innovation-challenge/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Check it Out
+          </a>
+        </div>
+      ) : null}
     </section>
   );
 }
