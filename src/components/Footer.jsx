@@ -1,16 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { MapPin } from "lucide-react";
+import { MapPin, X, Instagram, Linkedin } from "lucide-react";
 import { Crisp } from "crisp-sdk-web";
 import { goToApp } from "../utils/deviceRedirect";
+import glassLogo from "../assets/Glass.webp";
 import BlurText from "./ui/BlurText";
 import { LandingCta } from "./ui/LandingCta";
-import { cldSrcSet, cldUrl } from "../lib/cloudinary";
-
-const FOOTER_LOGO_WIDTHS = [28, 56, 84];
-const footerLogo = {
-  src: cldUrl("glass/cta/ctalogo", { width: 56 }),
-  srcSet: cldSrcSet("glass/cta/ctalogo", FOOTER_LOGO_WIDTHS),
-};
 
 // Help Centre opens the support chat when Crisp is configured; the mailto
 // href stays as the no-JS / chat-disabled fallback.
@@ -24,6 +18,7 @@ const links = {
   Product: [
     { label: "Features", href: "/#solution" },
     { label: "How It Works", href: "/#how-it-works" },
+    { label: "Pricing", href: "/#pricing" },
     { label: "Integrations", href: null },
   ],
   "Use Cases": [
@@ -52,7 +47,7 @@ export default function Footer() {
   const navigate = useNavigate();
 
   return (
-    <footer className="relative isolate overflow-hidden bg-brand-navy text-white">
+    <footer className="relative isolate overflow-hidden bg-brand-ink text-white">
       {/* ── CTA ── */}
       <div className="relative pt-20 md:pt-28 pb-20 overflow-hidden">
         <div className="relative z-10 max-w-[860px] mx-auto px-6 text-center">
@@ -82,62 +77,66 @@ export default function Footer() {
           </p>
           <LandingCta
             onClick={() => goToApp("/sign-up", navigate)}
-            radius="sm"
             className="shadow-lg shadow-black/20"
           >
-            Get Started
+            Get Started Free
           </LandingCta>
         </div>
       </div>
 
       {/* ── Footer content ── */}
-      {/* z-10 so the nav columns and copyright sit above the watermark. */}
       <div className="relative z-10 max-w-[1140px] mx-auto px-6 pt-14 pb-8">
         {/* Brand */}
-        <div className="mb-8">
+        <div className="mb-6">
           <a href="/" className="inline-flex items-center gap-2 no-underline mb-3">
             <img
-              src={footerLogo.src}
-              srcSet={footerLogo.srcSet}
-              sizes="28px"
+              src={glassLogo}
               alt="Glass"
-              className="h-7 w-7 object-contain"
+              loading="lazy"
+              decoding="async"
+              className="w-7 h-7 object-contain"
             />
-            <span className="font-bold text-[22px] text-white">Glass</span>
+            <span className="font-bold text-[20px] text-white">Glass</span>
           </a>
           <a
             href="https://www.google.com/maps/search/?api=1&query=1%2C+Onyemargwu+Street%2C+Abule+Egba%2C+Lagos"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[14px] text-white/50 hover:text-white no-underline transition-colors"
+            className="flex items-center gap-1.5 text-[13px] text-white/50 hover:text-white no-underline transition-colors"
           >
             <MapPin size={14} className="text-white/40 flex-shrink-0" />
             1, Onyemargwu Street, Abule Egba, Lagos
           </a>
         </div>
 
-        {/* Nav columns — was a flat 2-col grid with a 120px gap even on
-            mobile (gap-30), which read as disjointed rather than a clean
-            footer, and every link sat at a flat 13px regardless of
-            screen size. Single column on true mobile, then 2/5 col as
-            before; text bumped to 14px (15px from sm) throughout. */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-10 mb-12">
+        {/* Nav columns */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-30 mb-12">
           {Object.entries(links).map(([section, items]) => (
             <div key={section}>
-              <p className="text-[14px] sm:text-[15px] font-bold text-white mb-4">{section}</p>
-              <ul className="space-y-3 sm:space-y-2.5 list-none p-0 m-0">
-                {items.map(({ label, href, chat }) => (
+              <p className="text-[13px] font-bold text-white mb-4">{section}</p>
+              <ul className="space-y-2.5 list-none p-0 m-0">
+                {items.map(({ label, href, target, rel, Icon, ariaLabel, chat }) => (
                   <li key={label}>
                     {href ? (
                       <a
                         href={href}
+                        target={target}
+                        rel={rel}
                         onClick={chat ? openChat : undefined}
                         className="text-[13px] text-white/60 hover:text-white no-underline transition-colors"
+                        aria-label={ariaLabel}
                       >
-                        {label}
+                        {Icon ? (
+                          <span className="flex items-center gap-2">
+                            <Icon className="h-5 w-5 text-white" />
+                            <span>{label}</span>
+                          </span>
+                        ) : (
+                          <span>{label}</span>
+                        )}
                       </a>
                     ) : (
-                      <span className="text-[14px] sm:text-[15px] text-white/35 cursor-default select-none">
+                      <span className="text-[13px] text-white/35 cursor-default select-none">
                         {label}
                       </span>
                     )}
@@ -148,9 +147,39 @@ export default function Footer() {
           ))}
         </div>
 
+        {/* Social icons — horizontal, more space between each, centered in footer */}
+        <div className="flex gap-8 mb-8 justify-center">
+          {[
+            { label: "X", href: "https://x.com/glasspayhq", Icon: X, ariaLabel: "X (Twitter)" },
+            {
+              label: "Instagram",
+              href: "https://www.instagram.com/glasspayhq",
+              Icon: Instagram,
+              ariaLabel: "Instagram",
+            },
+            {
+              label: "LinkedIn",
+              href: "https://ng.linkedin.com/company/glass-finance",
+              Icon: Linkedin,
+              ariaLabel: "LinkedIn",
+            },
+          ].map(({ label, href, Icon, ariaLabel }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={ariaLabel}
+              className="flex items-center justify-center p-2 rounded-g-1 hover:bg-white/10 transition-colors"
+            >
+              <Icon className="h-5 w-5 text-white" />
+            </a>
+          ))}
+        </div>
+
         {/* Copyright */}
         <div className="border-t border-white/10 pt-7 text-center">
-          <p className="text-[13px] sm:text-[14px] text-white/50">
+          <p className="text-[13px] text-white/50">
             Copyright © {new Date().getFullYear()} Glass Limited | Made for Nigerian communities
           </p>
         </div>
