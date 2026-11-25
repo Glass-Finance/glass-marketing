@@ -1007,17 +1007,17 @@ section {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 6px;
   margin-top: 36px;
   padding: 20px 24px;
   border: 1px solid #b9c7f3;
   background: var(--st-banner);
-  border-radius: 6px;
+  border-radius: 2px;
 }
 
 .st-banner strong {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 1px;
   font-size: 17px;
   font-weight: 500;
   color: var(--st-ink);

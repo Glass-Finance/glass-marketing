@@ -119,12 +119,13 @@ export default function Hero() {
         </div>
 
         <div
-          className="relative z-10 w-full max-w-[720px] mx-auto text-center px-6 pb-[65px] sm:pb-8"
+          className="relative z-10 w-full max-w-[1200px] mx-auto text-center px-6 pb-[65px] sm:pb-8"
           style={{ fontFamily: "Inter,-apple-system,sans-serif" }}
         >
           <Reveal variant="up" delay={80}>
-            <h1 className="mx-auto mb-7 max-w-[885px] text-center text-[clamp(30px,6vw,64px)] font-bold leading-[1.05] tracking-tight text-white sm:mb-8">
-              Collect dues. Track payments. Manage members.
+            <h1 className="mx-auto mb-7 max-w-[1100px] text-center text-[clamp(30px,6vw,64px)] font-bold leading-[1.05] tracking-tight text-white sm:mb-8 md:whitespace-nowrap md:text-[clamp(36px,5vw,64px)]">
+              Collect dues. Track payments.
+              <br className="hidden md:block" /> Manage members.
             </h1>
           </Reveal>
           <Reveal variant="up" delay={160}>
