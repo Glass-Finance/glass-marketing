@@ -562,7 +562,7 @@ section {
 .st-card {
   background: #fff;
   border: 1px solid var(--st-line);
-  border-radius: 14px;
+  border-radius: var(--st-radius-sm);
   padding: 9px;
   display: flex;
   flex-direction: column;
@@ -608,7 +608,7 @@ section {
 .st-stage {
   position: relative;
   aspect-ratio: 1.75 / 1;
-  border-radius: 8px;
+  border-radius: var(--st-radius-sm);
   overflow: hidden;
   background:
     radial-gradient(60% 70% at 25% 55%, #dfe2f4 0, transparent 70%),
@@ -1090,9 +1090,13 @@ section {
   }
 }
 
-/* ── How it works section: four layered reveal cards ────────────────────────
-   Ported from the reference design (how-it-works.html). Each card is its own
-   container (`container-type: inline-size`), so every dimension inside is
+/* ── How it works section: one card, four stacked scenes ────────────────────
+   Single .hiw-card holds four .hiw-scene panels (icon + title + screenshot).
+   Only the active scene is visible (`.is-active`). Switching is driven by
+   autoplay (`STEP_MS`), swipe gestures, and hover pause — not Intersection
+   Observer. The card itself is a container (`container-type: inline-size`) so
+   all inner dimensions use cqw, letting a 1216×587 composition scale fluidly.
+   Only one breakpoint below is for the layout flip, not sizing.
    written in cqw — one unit of that card's own width — which is what lets a
    1216x587 composition scale from a phone to a wide viewport with no width
    media query at all. The one breakpoint below is for the layout flip, not
@@ -1267,15 +1271,24 @@ section {
 
 @media (max-width: 760px) {
   /* The panel stops being a composition and becomes a stack: title first,
-     screenshot below it. Percentages and cqw stop mattering, hence the
-     !important — the frame and screen take their positions from inline
-     styles, and only !important outranks those. */
+     screenshot below it. All four scenes share one grid cell, so the card is
+     as tall as the tallest scene and never jumps between steps. cqw and
+     percentages stop mattering, hence the !important — the frame and screen
+     take their positions from inline styles, and only !important outranks those. */
   .hiw-card {
     aspect-ratio: auto;
+    display: grid;
+    padding: 22px;
+  }
+
+  .hiw-scene {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 1;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 22px;
-    padding: 22px;
   }
 
   .hiw-info {
