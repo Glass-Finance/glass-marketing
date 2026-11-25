@@ -1091,10 +1091,6 @@ section {
 }
 
 /* ── How it works section: one card, four switching scenes ──────────────────
-   REPLACES the old "How it works section: four layered reveal cards" block
-   in index.css (from that comment through the closing brace of its
-   `@media (max-width: 760px)` rule, just above the Crisp launcher block).
-
    There is a single .hiw-card (a container: `container-type: inline-size`),
    so every dimension inside is written in cqw — one unit of the card's own
    width — which lets the 1216x587 composition scale from a phone to a wide
@@ -1293,12 +1289,6 @@ section {
 }
 
 @media (max-width: 760px) {
-  /* The panel stops being a composition and becomes a stack: title first,
-     screenshot below it. All four scenes share one grid cell, so the card is
-     as tall as the tallest scene and never jumps between steps. cqw and
-     percentages stop mattering, hence the !important — the frame and screen
-     take their positions from inline styles, and only !important outranks
-     those. */
   .hiw-card {
     aspect-ratio: auto;
     display: grid;
@@ -1318,20 +1308,30 @@ section {
   .hiw-info {
     position: static;
     transform: none;
-    gap: 14px;
+    gap: 12px;
     order: 1;
   }
 
   .hiw-ico {
-    width: 52px;
-    height: 52px;
+    width: 44px;
+    height: 44px;
   }
 
   .hiw-card h3 {
-    font-size: clamp(20px, 6vw, 26px);
+    font-size: clamp(16px, 4.6vw, 20px);
     /* Never clip a title on a narrow phone: let a line wrap rather than
        overflow the panel (the desktop nowrap stays). */
     white-space: normal;
+    min-width: 0;
+  }
+
+  /* The desktop line breaks come from separate .hiw-ln blocks. On mobile,
+     let them sit side by side so the title only wraps when it runs out of
+     room. inline-block keeps the overflow-hidden "rise" animation working. */
+  .hiw-ln {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 0.25em;
   }
 
   .hiw-frame {
