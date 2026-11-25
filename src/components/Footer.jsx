@@ -43,6 +43,22 @@ const links = {
   ],
 };
 
+const socials = [
+  { label: "X", href: "https://x.com/glasspayhq", Icon: X, ariaLabel: "X (Twitter)" },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/glasspayhq",
+    Icon: Instagram,
+    ariaLabel: "Instagram",
+  },
+  {
+    label: "LinkedIn",
+    href: "https://ng.linkedin.com/company/glass-finance",
+    Icon: Linkedin,
+    ariaLabel: "LinkedIn",
+  },
+];
+
 export default function Footer() {
   const navigate = useNavigate();
 
@@ -110,7 +126,7 @@ export default function Footer() {
         </div>
 
         {/* Nav columns */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-30 mb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-8 gap-y-10 mb-12">
           {Object.entries(links).map(([section, items]) => (
             <div key={section}>
               <p className="text-[13px] font-bold text-white mb-4">{section}</p>
@@ -145,36 +161,26 @@ export default function Footer() {
               </ul>
             </div>
           ))}
-        </div>
 
-        {/* Social icons — horizontal, more space between each, centered in footer */}
-        <div className="flex gap-8 mb-8 justify-center">
-          {[
-            { label: "X", href: "https://x.com/glasspayhq", Icon: X, ariaLabel: "X (Twitter)" },
-            {
-              label: "Instagram",
-              href: "https://www.instagram.com/glasspayhq",
-              Icon: Instagram,
-              ariaLabel: "Instagram",
-            },
-            {
-              label: "LinkedIn",
-              href: "https://ng.linkedin.com/company/glass-finance",
-              Icon: Linkedin,
-              ariaLabel: "LinkedIn",
-            },
-          ].map(({ label, href, Icon, ariaLabel }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={ariaLabel}
-              className="flex items-center justify-center p-2 rounded-g-1 hover:bg-white/10 transition-colors"
-            >
-              <Icon className="h-5 w-5 text-white" />
-            </a>
-          ))}
+          {/* Socials sit in the nav grid so the heading lines up with the
+              other columns; the icons stay in a single horizontal row. */}
+          <div>
+            <p className="text-[13px] font-bold text-white mb-4">Social</p>
+            <div className="flex items-center gap-2">
+              {socials.map(({ label, href, Icon, ariaLabel }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={ariaLabel}
+                  className="flex items-center justify-center p-2 rounded-g-1 hover:bg-white/10 transition-colors"
+                >
+                  <Icon className="h-5 w-5 text-white" />
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Copyright */}
