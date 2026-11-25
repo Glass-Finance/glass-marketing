@@ -1,23 +1,31 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { goToApp } from "../../utils/deviceRedirect";
 
 // ── How it works ────────────────────────────────────────────────────────────
-// Ported from the reference design (how-it-works.html): four full-width
-// cards, each a purple panel holding a bordered frame with an app screenshot
-// on one side and a circled icon + title on the other. Sides alternate.
+// ONE purple card that plays through four steps. Each step is a "scene"
+// (circled icon + title + framed screenshot); all four are stacked in the
+// same card and only the active one is visible, so switching steps swaps the
+// content, not the card.
 //
-// Geometry is expressed in the card's own coordinate space, so every value
-// is a percentage of the 1216x587 card and the whole card scales with the
-// viewport via container queries (see .hiw-* in index.css):
-//   ix       – left offset of the info block (text/icon), % of card width
+// Geometry is in the card's own coordinate space (1216x587), exactly as
+// before, and scales with the viewport via container queries (.hiw-* in
+// index.css):
+//   ix       – left offset of the info block (icon + title), % of card width
 //   ar       – aspect ratio of the screenshot box, used once on mobile
 //   dir      – which way the screenshot slides in (+1 right, -1 left)
 //   framePos – the bordered frame, % of the card
 //   screenPos– the screenshot inside its frame, % of the frame
+//
+// Playback: starts the first time the card is ~40% on screen and advances
+// every STEP_MS. It holds while the pointer is over the card and while the
+// card is off-screen; swiping on touch jumps a step. With
+// prefers-reduced-motion there is no autoplay, so the first step simply
+// stays put (swipe still works).
 const STEPS = [
   {
+    label: "Create community",
     ix: "1.97%",
     ar: "596/480",
     dir: "1",
@@ -29,6 +37,7 @@ const STEPS = [
     screenPos: { left: "3.286%", top: "4.545%", width: "85.143%", height: "90.909%" },
   },
   {
+    label: "Add members",
     ix: "66.4%",
     ar: "622/480",
     dir: "-1",
@@ -40,6 +49,7 @@ const STEPS = [
     screenPos: { left: "3.582%", top: "4.545%", width: "92.836%", height: "90.909%" },
   },
   {
+    label: "Payment plan",
     ix: "1.97%",
     ar: "497/480",
     dir: "1",
@@ -52,6 +62,7 @@ const STEPS = [
     screenPos: { left: "4.404%", top: "4.554%", width: "91.193%", height: "91.082%" },
   },
   {
+    label: "Go live",
     ix: "64.06%",
     ar: "640/480",
     dir: "-1",
@@ -64,94 +75,130 @@ const STEPS = [
   },
 ];
 
+const COUNT = STEPS.length;
+const STEP_MS = 6000; // time each step stays on screen
+
 export default function OrganizationHowItWorks() {
   const navigate = useNavigate();
-  const rootRef = useRef(null);
+  const slotRef = useRef(null);
+  const swipeX = useRef(null);
+  const [active, setActive] = useState(0);
+  const [started, setStarted] = useState(false); // first time on screen
+  const [inView, setInView] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const onCtaClick = () => goToApp("/sign-up", navigate);
 
-  // One orchestrated reveal per card, played once when it scrolls into view.
-  // Cards reveal strictly in order: a card waits for the one above it, so a
-  // fast scroll still reads as a sequence rather than everything popping at
-  // once. With no IntersectionObserver the whole set shows immediately.
+  // Observe the plain wrapper, never the card itself: the card starts fully
+  // clipped (clip-path), and an IntersectionObserver reads a clipped target as
+  // 0% visible, so it would never fire.
   useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return undefined;
-    const cards = Array.from(root.querySelectorAll(".hiw-card"));
-    if (!cards.length) return undefined;
-
-    const revealAll = () => cards.forEach((card) => card.classList.add("is-in"));
+    const el = slotRef.current;
+    if (!el) return undefined;
     if (!("IntersectionObserver" in window)) {
-      revealAll();
+      setStarted(true);
+      setInView(true);
       return undefined;
     }
-
-    const seen = new Array(cards.length).fill(false);
-    let next = 0;
-    let observer = null;
-    const flush = () => {
-      while (next < cards.length && seen[next]) {
-        cards[next].classList.add("is-in");
-        next += 1;
-      }
-      if (next >= cards.length && observer) observer.disconnect();
-    };
-
-    observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) seen[cards.indexOf(entry.target)] = true;
-        });
-        flush();
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setInView(entry.isIntersecting);
+        if (entry.isIntersecting) setStarted(true);
       },
-      { threshold: 0.35 },
+      { threshold: 0.4 },
     );
-    cards.forEach((card) => observer.observe(card));
-
+    observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
+  const go = (i) => setActive(((i % COUNT) + COUNT) % COUNT);
+
+  // Autoplay. Re-armed whenever the step changes (so a swipe restarts the
+  // full dwell time), and cleared while held, off-screen or unmounted.
+  useEffect(() => {
+    if (!started || !inView || hovered) return undefined;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const id = setTimeout(() => setActive((a) => (a + 1) % COUNT), STEP_MS);
+    return () => clearTimeout(id);
+  }, [started, inView, hovered, active]);
+
+  const onSwipeEnd = (e) => {
+    if (swipeX.current == null) return;
+    const dx = e.changedTouches[0].clientX - swipeX.current;
+    swipeX.current = null;
+    if (Math.abs(dx) > 48) go(active + (dx < 0 ? 1 : -1));
+  };
+
   return (
     <section
-      ref={rootRef}
       className="mx-auto w-full max-w-[1216px] px-5 py-[clamp(48px,8vw,104px)]"
       id="how-it-works"
     >
-      <header className="mb-[clamp(32px,5vw,56px)] max-w-[560px]">
-        <h2 className="text-[clamp(32px,4.4vw,48px)] font-bold leading-[1.05] tracking-[-0.03em] text-[#0d0d12]">
-          How it works
-        </h2>
-        <p className="mt-[14px] text-[17px] leading-[1.5] text-[#5d5d6b]">
-          From an empty workspace to a live community that collects payments, in four steps.
-        </p>
-      </header>
+    <div className="text-center mb-12">
+      <div className="mb-5 flex justify-center">
+        <span className="inline-flex items-center border border-brand-deep/25 text-brand-deep text-[13px] font-medium px-5 py-2 rounded-full">
+          How We Work
+        </span>
+      </div>
 
-      <div className="hiw-cards">
-        {STEPS.map((step, i) => (
-          <article
-            key={step.screen}
-            className="hiw-card"
-            aria-label={`Step ${i + 1}`}
-            style={{ "--ix": step.ix, "--ar": step.ar, "--dir": step.dir }}
-          >
-            <div className="hiw-info">
-              <div className="hiw-ico">
-                <img src={step.icon} alt="" width="72" height="72" aria-hidden="true" />
+      <h2 className="text-[clamp(26px,5vw,58px)] font-bold text-brand-ink leading-[1.15] tracking-[-0.02em] mb-4">
+        From setup to collecting dues.
+        <br className="hidden md:block" /> All in one place.
+      </h2>
+
+      <p
+        className="text-[clamp(15px,2vw,17px)] text-black/60 mx-auto leading-[1.7]"
+        style={{ maxWidth: "720px" }}
+      >
+        Set up your community, link member payment methods, and let Glass handle the rest.
+      </p>
+    </div>
+
+      <div
+        ref={slotRef}
+        className="hiw-slot"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        <div
+          className={`hiw-card${started ? " is-in" : ""}`}
+          role="group"
+          aria-roledescription="carousel"
+          aria-label={`How it works, step ${active + 1} of ${COUNT}`}
+          onTouchStart={(e) => {
+            swipeX.current = e.touches[0].clientX;
+          }}
+          onTouchEnd={onSwipeEnd}
+        >
+          {STEPS.map((step, i) => (
+            <article
+              key={step.screen}
+              className={`hiw-scene${started && i === active ? " is-active" : ""}`}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${i + 1} of ${COUNT}`}
+              aria-hidden={i !== active}
+              style={{ "--ix": step.ix, "--ar": step.ar, "--dir": step.dir }}
+            >
+              <div className="hiw-info">
+                <div className="hiw-ico">
+                  <img src={step.icon} alt="" width="72" height="72" aria-hidden="true" />
+                </div>
+                <h3>
+                  {step.lines.map((line) => (
+                    <span key={line} className="hiw-ln">
+                      <span>{line}</span>
+                    </span>
+                  ))}
+                </h3>
               </div>
-              <h3>
-                {step.lines.map((line) => (
-                  <span key={line} className="hiw-ln">
-                    <span>{line}</span>
-                  </span>
-                ))}
-              </h3>
-            </div>
-            <div className="hiw-frame" style={step.framePos}>
-              <div className="hiw-screen" style={step.screenPos}>
-                <img src={step.screen} alt={step.screenAlt} />
+              <div className="hiw-frame" style={step.framePos}>
+                <div className="hiw-screen" style={step.screenPos}>
+                  <img src={step.screen} alt={step.screenAlt} decoding="async" />
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
+            </article>
+          ))}
+        </div>
       </div>
 
       <div className="mt-12 flex justify-center md:mt-20">

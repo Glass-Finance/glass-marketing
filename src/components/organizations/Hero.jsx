@@ -123,15 +123,16 @@ export default function Hero() {
           style={{ fontFamily: "Inter,-apple-system,sans-serif" }}
         >
           <Reveal variant="up" delay={80}>
-            <h1 className="mx-auto mb-7 max-w-[1100px] text-center text-[clamp(30px,6vw,64px)] font-bold leading-[1.05] tracking-tight text-white sm:mb-8 md:whitespace-nowrap md:text-[clamp(36px,5vw,64px)]">
+            <h1 className="mx-auto mb-7 max-w-[1100px] text-center text-[clamp(30px,6vw,64px)] font-bold leading-[1.25] tracking-tight text-white sm:mb-8 md:whitespace-nowrap md:text-[clamp(36px,5vw,64px)]">
               Collect dues. Track payments.
               <br className="hidden md:block" /> Manage members.
             </h1>
           </Reveal>
           <Reveal variant="up" delay={160}>
-            <p className="mx-auto mb-8 max-w-[767px] text-[16px] leading-[1.25] text-white/70 sm:mb-10 sm:text-[18px] sm:leading-relaxed">
-              Create payment plans, collect dues and contributions, and track every member&apos;s
-              payment in one place. No more chasing transfers or updating spreadsheets.
+            <p className="mx-auto mb-8 max-w-[760px] text-[16px] leading-[1.25] text-white/70 sm:mb-10 sm:text-[18px] sm:leading-relaxed">
+              Give your community a simpler way to manage contributions. Create payment plans, keep
+              member records organised, and see who has paid without chasing transfers or updating
+              spreadsheets.
             </p>
           </Reveal>
           <Reveal variant="up" delay={240}>
