@@ -1090,6 +1090,235 @@ section {
   }
 }
 
+/* ── How it works section: four layered reveal cards ────────────────────────
+   Ported from the reference design (how-it-works.html). Each card is its own
+   container (`container-type: inline-size`), so every dimension inside is
+   written in cqw — one unit of that card's own width — which is what lets a
+   1216x587 composition scale from a phone to a wide viewport with no width
+   media query at all. The one breakpoint below is for the layout flip, not
+   for sizing.
+
+   Structure: .hiw-card (purple panel) holds .hiw-frame (the hairline-bordered
+   inset) which holds .hiw-screen (the screenshot), plus .hiw-info — the
+   circled icon and title, absolutely positioned at the card's own --ix so it
+   lands on the empty half of the panel. Sides alternate: --ix is large when
+   the frame sits left, small when it sits right.
+
+   The reveal is one sequence per card, played once when the card crosses 35%
+   visibility and always in order (a card waits for the one above it) — see
+   the IntersectionObserver in OrganizationHowItWorks.jsx. Timings are the
+   reference's: frame at .3s, screenshot at .5s, icon spring at .85s, title
+   lines from 1.05s.
+
+   Colours are the reference's light-theme values, hardcoded: this site is
+   light-only (body paints #f5f5f6), so its dark-mode branch has nothing to
+   attach to here. */
+
+.hiw-cards {
+  display: grid;
+  gap: 28px;
+}
+
+.hiw-card {
+  --hiw-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  container-type: inline-size;
+  aspect-ratio: 1216/587;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #3a2776 url("/hiw/card-bg.webp") center / cover no-repeat;
+  /* hidden until it reveals: wipes down from its own top edge */
+  clip-path: inset(0 0 100% 0 round 10px);
+  opacity: 0;
+}
+
+.hiw-card.is-in {
+  clip-path: inset(0 0 0 0 round 10px);
+  opacity: 1;
+  transition:
+    clip-path 0.9s var(--hiw-ease),
+    opacity 0.4s;
+}
+
+.hiw-info {
+  position: absolute;
+  top: 50%;
+  left: var(--ix);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1.3cqw;
+}
+
+.hiw-ico {
+  flex: none;
+  width: 5.92cqw;
+  height: 5.92cqw;
+  opacity: 0;
+  transform: scale(0.55) rotate(-12deg);
+}
+
+.hiw-ico img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hiw-card h3 {
+  margin: 0;
+  font-size: 2.63cqw;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #e6def2;
+  white-space: nowrap;
+}
+
+/* Each title line gets an overflow-hidden wrapper so it can rise from below
+   its own baseline instead of fading. */
+.hiw-ln {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+}
+
+.hiw-ln > span {
+  display: block;
+  transform: translateY(110%);
+}
+
+.hiw-frame {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  opacity: 0;
+  transform: scale(0.965);
+}
+
+.hiw-screen {
+  position: absolute;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(10, 5, 40, 0.35);
+  opacity: 0;
+  transform: translateX(calc(var(--dir) * 48px));
+}
+
+.hiw-screen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left top;
+}
+
+/* ── the sequence, once the card is in view ── */
+
+.hiw-card.is-in .hiw-frame {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.6s 0.3s,
+    transform 0.9s 0.3s var(--hiw-ease);
+}
+
+.hiw-card.is-in .hiw-screen {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.6s 0.5s,
+    transform 1s 0.5s var(--hiw-ease);
+}
+
+.hiw-card.is-in .hiw-ico {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.4s 0.85s,
+    transform 0.7s 0.85s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hiw-card.is-in .hiw-ln > span {
+  transform: none;
+  transition: transform 0.8s var(--hiw-ease);
+}
+
+.hiw-card.is-in .hiw-ln:nth-child(1) > span {
+  transition-delay: 1.05s;
+}
+
+.hiw-card.is-in .hiw-ln:nth-child(2) > span {
+  transition-delay: 1.17s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Backstop for the scripted reveal: show everything, immediately. */
+  .hiw-card,
+  .hiw-frame,
+  .hiw-screen,
+  .hiw-ico,
+  .hiw-ln > span {
+    clip-path: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+@media (max-width: 760px) {
+  /* The panel stops being a composition and becomes a stack: title first,
+     screenshot below it. Percentages and cqw stop mattering, hence the
+     !important — the frame and screen take their positions from inline
+     styles, and only !important outranks those. */
+  .hiw-card {
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: 22px;
+  }
+
+  .hiw-info {
+    position: static;
+    transform: none;
+    gap: 14px;
+    order: 1;
+  }
+
+  .hiw-ico {
+    width: 52px;
+    height: 52px;
+  }
+
+  .hiw-card h3 {
+    font-size: clamp(20px, 6vw, 26px);
+    /* Never clip a title on a narrow phone: let a line wrap rather than
+       overflow the panel (the desktop nowrap stays). */
+    white-space: normal;
+  }
+
+  .hiw-frame {
+    position: relative;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    order: 2;
+    padding: 10px;
+  }
+
+  .hiw-screen {
+    position: relative;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: var(--ar);
+    /* rises into place instead of sliding in from the side */
+    transform: translateY(30px);
+  }
+}
+
 /* ── Crisp support-chat launcher ─────────────────────────────────────────
    Kept in sync with glass-waitlist's index.css — same Crisp website ID on
    both properties, so the landing and the app must render the same
