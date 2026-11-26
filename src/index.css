@@ -1388,7 +1388,7 @@ section {
 #crisp-chatbox > div > div[role="button"] span[data-id="chat_opened"] {
   background-color: #002fa7 !important;
   background-image: url("/crisp-launcher-glyph.svg") !important;
-  background-size: 24px 24px !important;
+  background-size: 20px 20px !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
 }

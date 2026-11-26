@@ -411,7 +411,7 @@ export default function ProblemSection() {
                   </div>
                   <img src={phoneFrame} alt="" draggable="false" className={FRAME} />
                 </div>
-                <div data-role="smsNote" className={`mt-[120px] max-[760px]:mt-4 ${NOTE_WRAP}`}>
+                <div data-role="chatNote" className={`mt-[120px] max-[760px]:mt-4 ${NOTE_WRAP}`}>
                   <i className={NOTE_LINE} />
                   <span className={NOTE_CARD}>
                     Everyone says they&apos;ve paid. Who actually did?
@@ -497,7 +497,7 @@ export default function ProblemSection() {
                   </div>
                   <img src={phoneFrame} alt="" draggable="false" className={FRAME} />
                 </div>
-                <div data-role="smsNote" className={`mt-[120px] max-[760px]:mt-3 ${NOTE_WRAP}`}>
+                <div data-role="chatNote" className={`mt-[120px] max-[760px]:mt-3 ${NOTE_WRAP}`}>
                   <i className={NOTE_LINE} />
                   <span className={NOTE_CARD}>Who is J Ngozi? Which member? Which due?</span>
                 </div>
@@ -522,7 +522,7 @@ export default function ProblemSection() {
             {/* ── Scene 4: the spreadsheet ── */}
             <div data-role="scene" className={SCENE}>
               <div className="flex items-center justify-center max-[760px]:flex-col">
-                <div className={`${DEVICE} relative aspect-square w-[540px] max-w-full`}>
+                <div className={`${DEVICE} relative aspect-square w-[680px] max-w-full`}>
                   <img
                     src={laptopSheet}
                     width="540"
