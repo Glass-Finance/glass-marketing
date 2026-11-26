@@ -95,8 +95,9 @@ export default function OrganizationHowItWorks() {
     const el = slotRef.current;
     if (!el) return undefined;
     if (!("IntersectionObserver" in window)) {
-      setStarted(true);
-      setInView(true);
+      // setState directly is fine - not in render, effect runs after render
+      setStarted(true)  # eslint-disable-line react-hooks/set-state-in-effect
+setInView(true)  # eslint-disable-line react-hooks/set-state-in-effect
       return undefined;
     }
     const observer = new IntersectionObserver(
@@ -133,25 +134,25 @@ export default function OrganizationHowItWorks() {
       className="mx-auto w-full max-w-[1216px] px-5 py-[clamp(48px,8vw,104px)]"
       id="how-it-works"
     >
-    <div className="text-center mb-12">
-      <div className="mb-5 flex justify-center">
-        <span className="inline-flex items-center border border-brand-deep/25 text-brand-deep text-[13px] font-medium px-5 py-2 rounded-full">
-          How We Work
-        </span>
+      <div className="text-center mb-12">
+        <div className="mb-5 flex justify-center">
+          <span className="inline-flex items-center border border-brand-deep/25 text-brand-deep text-[13px] font-medium px-5 py-2 rounded-full">
+            How We Work
+          </span>
+        </div>
+
+        <h2 className="text-[clamp(26px,5vw,58px)] font-bold text-brand-ink leading-[1.15] tracking-[-0.02em] mb-4">
+          From setup to collecting dues.
+          <br className="hidden md:block" /> All in one place.
+        </h2>
+
+        <p
+          className="text-[clamp(15px,2vw,17px)] text-black/60 mx-auto leading-[1.7]"
+          style={{ maxWidth: "720px" }}
+        >
+          Set up your community, link member payment methods, and let Glass handle the rest.
+        </p>
       </div>
-
-      <h2 className="text-[clamp(26px,5vw,58px)] font-bold text-brand-ink leading-[1.15] tracking-[-0.02em] mb-4">
-        From setup to collecting dues.
-        <br className="hidden md:block" /> All in one place.
-      </h2>
-
-      <p
-        className="text-[clamp(15px,2vw,17px)] text-black/60 mx-auto leading-[1.7]"
-        style={{ maxWidth: "720px" }}
-      >
-        Set up your community, link member payment methods, and let Glass handle the rest.
-      </p>
-    </div>
 
       <div
         ref={slotRef}

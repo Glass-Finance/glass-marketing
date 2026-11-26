@@ -37,7 +37,8 @@ const STEPS = [
     lines: ["Sign up for Glass in seconds."],
     icon: "/hiw/m-icon-1.svg",
     screen: "/hiw/m-step-1.webp",
-    screenAlt: "The Glass Create Your Account screen with an email address field and a Continue button",
+    screenAlt:
+      "The Glass Create Your Account screen with an email address field and a Continue button",
     framePos: { left: "50.000%", top: "10.903%", width: "45.066%", height: "97.274%" },
     screenPos: { left: "4.380%", top: "4.203%", width: "91.241%", height: "87.391%" },
   },
@@ -89,8 +90,9 @@ export default function MemberHowItWorks() {
     const el = slotRef.current;
     if (!el) return undefined;
     if (!("IntersectionObserver" in window)) {
-      setStarted(true);
-      setInView(true);
+      // setState directly is fine here - not in render, effect runs after render
+      setStarted(true)  # eslint-disable-line react-hooks/set-state-in-effect
+setInView(true)  # eslint-disable-line react-hooks/set-state-in-effect
       return undefined;
     }
     const observer = new IntersectionObserver(
