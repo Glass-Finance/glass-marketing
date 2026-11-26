@@ -528,6 +528,7 @@ section {
   --st-green-ink: #0a7a2b;
   --st-radius-sm: 2px;
   --st-banner: #ccd8fd;
+  --st-border: rgb(0 0 0 / 0.1);
   --st-ease: cubic-bezier(0.22, 0.8, 0.3, 1);
 }
 
@@ -1031,7 +1032,7 @@ section {
 .st-btn {
   flex: none;
   padding: 12px 24px;
-  border: 1px solid var(--st-ink);
+  border: 1px solid var(--st-border);
   border-radius: var(--st-radius-sm);
   background: transparent;
   font:

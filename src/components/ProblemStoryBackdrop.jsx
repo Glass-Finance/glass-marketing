@@ -1,4 +1,4 @@
-import illustration from "../assets/problem/story-illustration-bg.png";
+import illustration from "../assets/problem/story-illustration-bg.webp";
 
 export default function ProblemStoryBackdrop({ className = "" }) {
   return (

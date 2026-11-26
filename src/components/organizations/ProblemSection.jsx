@@ -1,160 +1,156 @@
 /**
  * Organizations "Problem" section — the scripted payment-tracing story.
  *
- * One ₦25,000 dues payment is followed from Friday to Sunday across five
- * surfaces (group chat, bank SMS, manual reconciliation, a spreadsheet, and
- * the member asking where the money went) to make the cost of having no
- * record of funds concrete.
+ * One ₦25,000 dues payment is followed across five scenes (group chat, bank
+ * SMS, counting by hand, a spreadsheet, the member asking where it went) on
+ * the purple ProblemStoryBackdrop card, as in the Figma.
  *
- * The timeline is imperative on purpose: it types messages, walks a
- * spreadsheet cell by cell and counts the difference at the end, which is
- * not expressible as declarative state without a lot of ceremony. It drives
- * the DOM through a small set of `data-role` hooks scoped to this component's
- * root, so it can't collide with the member problem section or anything else
- * on the page.
+ * The phones are rebuilt from the individual Figma exports in
+ * src/assets/problem and each layer pops in on a timeline, the way the
+ * original scripted version typed its messages. The laptop keeps its single
+ * image and reveals the table one row at a time.
  *
- * Styling is Tailwind-only. `CLS` below maps the short class names used by
- * the timeline markup to their utilities — declared as literal strings in this
- * file, which is also how Tailwind's scanner sees them.
+ * Phone: phone-frame.png is the Figma phone (273 × 564) with the screen area
+ * made transparent. The screen (252 × 541, at x 10 / y 12) is built underneath
+ * it, so the real bezel, corners and buttons sit on top. Chat: status bar 44 +
+ * chat-header 44 + thread + bottom-bar 66.
+ *
+ * Everything is driven through `data-role` hooks scoped to this component's
+ * root, so it can't collide with the member problem section.
  */
 
 import { useEffect, useRef } from "react";
 import { Clock3, Eye } from "lucide-react";
 import { cldUrl } from "../../lib/cloudinary";
 import ProblemStoryBackdrop from "../ProblemStoryBackdrop";
+import laptopSheet from "../../assets/problem/laptop-sheet.svg";
+// The Figma phone with its screen cut out (transparent), so layers show through.
+import phoneFrame from "../../assets/problem/phone-frame.png";
 
-/**
- * Class map for the markup the timeline injects. Keys are the semantic role;
- * values are the utilities. Kept as one table so the design's values live in
- * a single place instead of being scattered through string concatenation.
- */
-const CLS = {
-  /* Chat bubbles */
-  day: "self-center rounded-[7px] bg-white px-2.5 py-[3px] text-[10.5px] text-[#54656f] shadow-[0_1px_1px_#0001] mb-[3px]",
-  wb: "relative max-w-[86%] rounded-[2px] px-2 pt-[5px] pb-[3px] text-[13px] leading-[1.28] text-[#111b21] shadow-[0_1px_0.5px_#0002] animate-[var(--animate-gps-pop)]",
-  wbIn: "self-start bg-white rounded-tl-none before:absolute before:-left-1.5 before:top-0 before:border-[6px] before:border-transparent before:border-t-white before:border-r-white before:content-['']",
-  wbOut:
-    "self-end bg-[#d9fdd3] rounded-tr-none before:absolute before:-right-1.5 before:top-0 before:border-[6px] before:border-transparent before:border-t-[#d9fdd3] before:border-l-[#d9fdd3] before:content-['']",
-  wbSender: "block text-[12px] font-semibold no-underline",
-  wbTime: "float-right mt-1.5 ml-2 text-[9.5px] text-[#667781] no-underline",
-  wbTicks: "ml-0.5 text-[#53bdeb] not-italic",
-  wbImg: "w-[206px] px-[3px] pb-[3px] pt-[3px]",
-  wbImgCaption: "pt-1 px-1.5 pb-0 text-[13px]",
+/* Every file in src/assets/problem, looked up by file name. A name that does
+   not exist resolves to undefined and that layer is simply skipped, so a
+   mistyped name can't crash the section. */
+const ASSETS = import.meta.glob("../../assets/problem/*.{png,svg,jpg,jpeg,webp}", {
+  eager: true,
+  import: "default",
+});
+const asset = (name) => ASSETS[`../../assets/problem/${name}`];
 
-  /* Payment-confirmation screenshot inside the chat */
-  shot: "relative h-[262px] overflow-hidden rounded-md bg-[#111]",
-  si: "w-[380px] origin-top-left [transform:scale(0.526)] px-4 pt-[18px] pb-4 text-[15px] leading-[1.3] text-white [font-family:'Helvetica_Neue',Arial,sans-serif]",
-  receipt: "rounded-[14px] bg-[#1c1c1e] px-4 pt-[18px] pb-1.5 text-center",
-  receiptAvatar:
-    "mx-auto mb-2.5 block size-[58px] rounded-full bg-[#7c4dff] bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2024%2024%27%3E%3Cpath%20fill=%27%23f3d6ff%27%20d=%27M12%2012a4%204%200%20100-8%204%204%200%200%208zm0%202c-3%200-8%201.5-8%204v2h16v-2c0-2.5-5-4-8-4z%27/%3E%3C/svg%3E')] bg-contain bg-center bg-no-repeat",
-  receiptTo: "text-[16px] text-[#f2f2f2]",
-  receiptAmount: "my-1.5 mt-1.5 text-[38px] font-bold tracking-[-0.5px]",
-  receiptOk: "inline-flex items-center gap-[7px] text-[15px] text-[#ddd]",
-  receiptTick:
-    "grid size-5 place-items-center rounded-full bg-[#2bc48a] text-[12px] font-bold text-[#0b0b0b] not-italic [font-family:sans-serif]",
-  receiptCard:
-    "mx-4 mt-2.5 mb-2.5 rounded-[14px] border border-[#17362f] bg-[#0f1f1b] px-3 pt-3 pb-3.5",
-  receiptGreen: "flex items-center text-[15px] text-[#2bc48a]",
-  receiptHelp:
-    "m-auto grid size-6 place-items-center rounded-full border-2 border-[#aaa] text-[14px] text-[#aaa] not-italic",
-  receiptTrail: "mt-3.5 flex items-start",
-  receiptStep: "flex w-[92px] flex-none flex-col items-center gap-[7px] text-[13px] text-[#eee]",
-  // The step's own content has to be a centred column: as a plain block the
-  // <small> timestamps fall back to inline flow and collide with the label
-  // above them and the neighbouring column.
-  receiptStepBody: "flex flex-col items-center gap-[7px]",
-  receiptLine: "mt-2.5 h-0.5 flex-1 bg-[#2bc48a]",
-  receiptStepTime: "text-[10.5px] text-[#9a9a9a]",
-  receiptRow: "flex justify-between px-0.5 py-2.5 text-[15px] text-[#a8a8a8]",
-  receiptRowValue: "font-medium text-[#f2f2f2]",
-  receiptParty: "mt-3 flex justify-between px-4 py-4 text-[15px] text-[#a8a8a8]",
-  receiptPartyValue: "text-right text-[#f2f2f2]",
-  receiptPartySub: "block text-[13px] text-[#a8a8a8]",
-
-  /* SMS bubbles */
-  smsDay: "self-center text-[11px] text-[#5f6368]",
-  sms: "max-w-[90%] self-start rounded-[2px] bg-[#f1f3f4] px-3.5 py-2.5 text-[13px] leading-[1.4] animate-[var(--animate-gps-pop)]",
-  smsMeta: "mt-1 block text-[10.5px] text-[#5f6368]",
-
-  /* Spreadsheet */
-  cellHead:
-    "h-[21px] border border-[#dcdcdc] bg-[#efefef] px-1.5 text-center text-[11.5px] leading-[1.5] font-normal text-[#555]",
-  cellRowHead:
-    "h-[21px] w-[30px] border border-[#dcdcdc] bg-[#efefef] px-1.5 text-center text-[11.5px] leading-[1.5] font-normal text-[#555]",
-  cell: "h-[21px] border border-[#dcdcdc] px-1.5 text-[12px] leading-[1.5] whitespace-nowrap overflow-hidden relative",
-  // Full class rather than a border-colour override on `cell`: two competing
-  // `border-*` utilities on one element are resolved by stylesheet order, not
-  // by the order they appear in the class attribute.
-  cellData:
-    "h-[21px] border border-[#222] px-1.5 text-[12px] leading-[1.5] whitespace-nowrap overflow-hidden relative",
-  cellMoney: "text-right",
-  cellTotals:
-    "h-[21px] border border-[#222] bg-[#d9e8dc] px-1.5 text-[12px] leading-[1.5] text-center font-bold",
-  cellBold: "font-bold",
-  cellSelected: "relative z-2 outline-2 -outline-offset-2 outline-[#217346]",
-  cellBad: "bg-[#fde2e0] font-bold text-[#b3261e]",
+const photo = (name, width) => {
+  const hit = Object.entries(ASSETS).find(([path]) => path.includes(`/${name}.`));
+  return hit ? hit[1] : cldUrl(`glass/problem/${name}`, { width });
 };
 
-/** Build a chat bubble. `senders` set colours a member's name. */
-function bubble(cls, sender, senderColor, text, time, ticks, img) {
-  const parts = [`<div class="${cls}">`];
-  if (sender) {
-    parts.push(
-      `<u class="${CLS.wbSender}"${senderColor ? ` style="color:${senderColor}"` : ""}>${sender}</u>`,
-    );
-  }
-  if (img) parts.push(img);
-  parts.push(text);
-  if (time) parts.push(`<s class="${CLS.wbTime}">${time}${ticks ? "<i>✓✓</i>" : ""}</s>`);
-  parts.push("</div>");
-  return parts.join("");
-}
+// Layers pop in with the shared `gps-pop` animation and never shrink.
+const POP = "flex-none animate-[var(--animate-gps-pop)]";
 
-/**
- * The payment-confirmation screenshot shown inside the group chat — a
- * standalone SVG so it stays crisp at the phone's small size.
- */
-const RECEIPT_SCREENSHOT = `
-<div class="${CLS.shot}">
-  <div class="${CLS.si}">
-    <div class="${CLS.receipt}">
-      <span class="${CLS.receiptAvatar}"></span>
-      <div class="${CLS.receiptTo}">To IKEJA TRADERS CLUB</div>
-      <div class="${CLS.receiptAmount}">₦25,000.00</div>
-      <div class="${CLS.receiptOk}"><i class="${CLS.receiptTick}">✓</i>Successful</div>
-      <div class="${CLS.receiptCard}">
-        <div class="${CLS.receiptGreen}">
-          <span>✓Credited in seconds</span><em class="${CLS.receiptHelp}">?</em>
-        </div>
-        <div class="${CLS.receiptTrail}">
-          <div class="${CLS.receiptStep}">
-            <div class="${CLS.receiptStepBody}">
-              ✓<br>Payment<br>Submitted<small class="${CLS.receiptStepTime}">09-25 6:09:41 PM</small>
-            </div>
-          </div>
-          <span class="${CLS.receiptLine}"></span>
-          <div class="${CLS.receiptStep}">
-            <div class="${CLS.receiptStepBody}">
-              ✓<br>Debit<br>Successful<small class="${CLS.receiptStepTime}">09-25 6:09:42 PM</small>
-            </div>
-          </div>
-          <span class="${CLS.receiptLine}"></span>
-          <div class="${CLS.receiptStep}">
-            <div class="${CLS.receiptStepBody}">
-              ✓<br>Money<br>Credited<small class="${CLS.receiptStepTime}">09-25 6:09:42 PM</small>
-            </div>
-          </div>
-        </div>
-        <div class="${CLS.receiptRow}">Transfer Amount<b class="${CLS.receiptRowValue}">₦25,000.00</b></div>
-        <div class="${CLS.receiptRow}">Fee<b class="${CLS.receiptRowValue}">₦0.00</b></div>
-        <div class="${CLS.receiptRow}">Payment Amount<b class="${CLS.receiptRowValue}">₦25,000.00</b></div>
-      </div>
-      <div class="${CLS.receiptParty}">
-        Recipient<div class="${CLS.receiptPartyValue}">IKEJA TRADERS CLUB<small class="${CLS.receiptPartySub}">CityBank | 0123456789</small></div>
-      </div>
+/* ── What pops into each phone, in order ──────────────────────────────────
+   `file` is an image in src/assets/problem; `html()` builds a bubble that has
+   no export of its own. `cls` positions the layer, `gap` is the pause (ms)
+   before the NEXT layer arrives. */
+const CHAT_POP = [
+  // Today pill, 102×24 — the Figma places it left of centre.
+  { file: "chat-today-pill.svg", cls: "self-start ml-[55px]", gap: 700 },
+  // Admin message, 192×213, positioned as in chat-thread.svg.
+  { file: "admin-bubble.svg", cls: "self-start ml-[36px]", gap: 1500 },
+  // Chidi's receipt card: white card, blue sender name, receipt-card.svg.
+  {
+    html: () => `
+      <div class="${POP} self-start ml-[20px] w-[200px] overflow-hidden rounded-xl bg-white shadow-[0_1px_2px_#0002]">
+        <div class="px-3 pt-2.5 text-[13px] leading-none font-medium text-[#5560d8]">Chidi</div>
+        <img src="${asset("receipt-card.svg") ?? ""}" alt="" draggable="false" class="block h-auto w-full">
+      </div>`,
+    gap: 1800,
+  },
+];
+
+/* The first SMS alert has no export (the sms-credit-alert file is the second,
+   cropped one), so it is drawn as text in the same bubble. */
+const SMS_ALERT_1 = `
+  <div class="${POP} self-start ml-4 w-[206px] rounded-[18px] bg-[#e9e9eb] px-3.5 py-3 text-[13.5px] leading-[21px] text-black">
+    Credit Alert!<br>Acc#: ********548<br>Amt: 5,000.00<br>Desc: TRF FROM J NGOZI/<br>MAR<br>NIP/MOB/0813****/DUES<br>Avail Bal: 1,309,512.40
+    <div class="mt-1 text-[11px] leading-none text-[#8a8a8e]">7:05PM . SIM 1</div>
+  </div>`;
+
+const SMS_POP = [
+  { file: "sms-yesterday-label.svg", cls: "self-center", gap: 600 },
+  { html: () => SMS_ALERT_1, gap: 1500 },
+  { file: "sms-today-label.svg", cls: "self-center", gap: 800 },
+  // Second alert, 206×87 — already cropped by the Figma, clipped by the input.
+  { file: "sms-credit-alert.svg", cls: "self-start ml-4", gap: 1400 },
+];
+
+/* Laptop table rows, measured on the 540×540 export: [top, bottom] in px.
+   Header row first, then the four members. */
+const SHEET_ROWS = [
+  [178, 203],
+  [203, 231],
+  [231, 259],
+  [259, 287],
+  [287, 315],
+];
+
+// Every scene shares this shell: stacked absolutely, hidden until `.on`,
+// sliding in from the right with a clip-path wipe.
+const SCENE =
+  "scene absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 max-[760px]:px-3 max-[760px]:py-4 invisible translate-x-10 [clip-path:inset(0_0_0_100%)] transition-[clip-path,transform,visibility] duration-750 [&.on]:visible [&.on]:translate-x-0 [&.on]:[clip-path:inset(0)] [&.on]:delay-0";
+
+// The callout card that wipes in beside a device (or under it on phones).
+const NOTE_WRAP =
+  "flex items-center [clip-path:inset(0_100%_0_0)] transition-[clip-path] duration-700 [&.show]:[clip-path:inset(0)] max-[760px]:flex-col max-[760px]:items-center";
+const NOTE_LINE =
+  "w-[46px] flex-none border-t-2 border-dashed border-[#e0ab88] max-[760px]:h-7 max-[760px]:w-auto max-[760px]:border-t-0 max-[760px]:border-l-2";
+const NOTE_CARD =
+  "max-w-[210px] rounded-lg border-l-4 border-[#e0ab88] bg-white px-4 py-3 text-[15px] leading-[1.35] font-medium text-[#0f1d6e] shadow-[0_8px_24px_#0000001a]";
+
+// Device: fades up when its scene turns on.
+const DEVICE =
+  "flex-none drop-shadow-[0_28px_40px_#00000040] translate-y-6 opacity-0 transition-[opacity,transform] duration-700 delay-300 [.on_&]:translate-y-0 [.on_&]:opacity-100";
+
+/* On phones the 273×564 device is scaled to 78% so the phone and its note
+   both fit in the stage. Tailwind's `scale` is its own CSS property, so it
+   doesn't fight the fade-up `translate`. The negative margin removes the
+   empty layout space the scale leaves behind (564 × 0.22 ≈ 124px). */
+const PHONE = `${DEVICE} relative h-[564px] w-[273px] max-[760px]:origin-top max-[760px]:scale-[0.78] max-[760px]:-mb-[124px]`;
+const SCREEN =
+  "absolute top-[12px] left-[10px] flex h-[541px] w-[252px] flex-col overflow-hidden rounded-[41px] font-[-apple-system,'SF_Pro_Text',Roboto,'Segoe_UI',system-ui,sans-serif]";
+const FRAME = "pointer-events-none absolute inset-0 z-30 block size-full select-none";
+
+const CAPTION_BASE =
+  "absolute inset-x-0 bottom-0 bg-[linear-gradient(to_top,rgba(14,14,16,0.94),rgba(14,14,16,0.62)_50%,transparent)] px-7 pt-[90px] pb-[26px] text-white [clip-path:inset(100%_0_0_0)] transition-[clip-path] duration-800 [&.show]:[clip-path:inset(0)] [&.show>em]:translate-y-0";
+const KICKER =
+  "flex items-center gap-2.5 text-[11.5px] font-semibold tracking-[0.12em] text-[#b9b9c0] uppercase before:w-[26px] before:border-t-2 before:border-[#e0ab88] before:content-['']";
+const CAPTION_TEXT =
+  "mt-2 block translate-y-[14px] text-[clamp(20px,2.6vw,28px)] leading-[1.2] font-semibold tracking-[-0.02em] not-italic transition-transform delay-250";
+const PHOTO =
+  "relative h-[480px] w-[min(100%,680px)] overflow-hidden rounded-[20px] shadow-[0_24px_50px_#00000026] max-[1040px]:h-[380px] max-[600px]:h-[300px]";
+const PHOTO_IMG =
+  "block h-full w-full scale-100 object-cover transition-transform duration-[9s] ease-out [transform-origin:60%_40%] [.zoom_&]:scale-110";
+
+/** iOS status bar: time on the left, signal / wifi / battery on the right. */
+function StatusBar({ signal }) {
+  return (
+    <div className="relative z-10 flex h-11 flex-none items-center justify-between pr-[18px] pl-[29px] text-[16px] leading-none font-semibold text-black">
+      <span>9:41</span>
+      <span className="flex items-center gap-[5px]">
+        {signal && (
+          <img src={signal} alt="" draggable="false" className="block h-[11px] w-[17px]" />
+        )}
+        <svg width="15" height="11" viewBox="0 0 15 11" fill="none" aria-hidden="true">
+          <path
+            d="M7.5 2.2c1.9 0 3.6.8 4.9 2l.9-.9A9.3 9.3 0 0 0 7.5.9C5.2.9 3 1.8 1.3 3.3l.9.9a7 7 0 0 1 5.3-2Zm0 3.2c1.1 0 2.1.4 2.9 1.1l.9-.9a6.1 6.1 0 0 0-3.8-1.4c-1.4 0-2.8.5-3.8 1.4l.9.9c.8-.7 1.8-1.1 2.9-1.1Zm0 3.1c.4 0 .8.2 1.1.4L7.5 10 6.4 8.9c.3-.2.7-.4 1.1-.4Z"
+            fill="#000"
+          />
+        </svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="21" height="11" rx="3.2" stroke="#000" opacity=".4" />
+          <rect x="2" y="2" width="18" height="8" rx="2" fill="#000" />
+          <path d="M23 4v4c.8-.3 1.5-1.1 1.5-2S23.800 4.300 23 4Z" fill="#000" opacity=".5" />
+        </svg>
+      </span>
     </div>
-  </div>
-</div>`;
+  );
+}
 
 export default function ProblemSection() {
   const rootRef = useRef(null);
@@ -163,191 +159,97 @@ export default function ProblemSection() {
     const root = rootRef.current;
     if (!root) return undefined;
 
-    /* Every lookup is scoped to this section so the timeline can never grab
-       (or be confused by) an element with the same role elsewhere. */
+    /* Every lookup is scoped to this section. */
     const $ = (role) => root.querySelector(`[data-role="${role}"]`);
     const $$ = (role) => [...root.querySelectorAll(`[data-role="${role}"]`)];
 
     let R = 0;
     let observer;
-    let current = null;
 
-    /* Who paid what, by spreadsheet row: [Jan, Feb, Mar]. */
-    const ROWS = [
-      ["Okafor C.", 25, 25, 0],
-      ["Eze N.", 25, 10, 25],
-      ["Bello T.", 25, 25, 0],
-      ["Adeyemi K.", 0, 25, 25],
-      ["Nwosu E.", 20, 25, 25],
-    ];
-    const COLS = "ABCDEFG";
+    const hide = (role) => $(role)?.classList.remove("show");
+    const show = (role) => $(role)?.classList.add("show");
+    const restartZoom = (role) => {
+      const el = $(role);
+      if (!el) return;
+      el.classList.remove("zoom");
+      void el.offsetWidth; // restart the zoom transition
+      el.classList.add("zoom");
+    };
 
-    /* Build the grid once: a header row plus 13 numbered rows. Injected into
-       the <table data-role="grid">, so the tags survive and lay out as a real
-       spreadsheet grid. Cells carry `data-role` (not `id`) because that is
-       what `$` resolves — `cell("A5")` looks up `[data-role="A5"]`. */
-    function buildGrid() {
-      const head = [`<tr><th class="${CLS.cellRowHead}"></th>`]
-        .concat(COLS.split("").map((c) => `<th class="${CLS.cellHead}">${c}</th>`))
-        .join("")
-        .concat("</tr>");
-      let html = head;
-      for (let r = 1; r <= 13; r++) {
-        html += `<tr><th class="${CLS.cellRowHead}">${r}</th>`;
-        for (let c = 0; c < 7; c++) {
-          // Rows 4-10 carry the data block (the "headline" row is row 4).
-          let cls = r >= 4 && r <= 10 && c < 6 ? CLS.cellData : CLS.cell;
-          if (r === 4 && c < 6) cls = CLS.cellTotals;
-          // Money columns are right-aligned, except in the centred headline row.
-          else if (c > 1) cls += " " + CLS.cellMoney;
-          html += `<td data-role="${COLS[c]}${r}" class="${cls}"></td>`;
-        }
-        html += "</tr>";
+    /** Append one layer to a phone's thread; it pops in via CSS. */
+    const pushLayer = (boxRole, item) => {
+      let markup = "";
+      if (item.html) {
+        markup = item.html();
+      } else {
+        const src = asset(item.file);
+        if (!src) return false;
+        markup = `<img src="${src}" alt="" draggable="false" class="${POP} ${item.cls}">`;
       }
-      $("grid").innerHTML = html;
-      $("grid").insertAdjacentHTML(
-        "afterbegin",
-        '<colgroup><col style="width:30px"><col style="width:34px"><col style="width:120px"><col span=3 style="width:78px"><col style="width:96px"><col></colgroup>',
-      );
-    }
+      $(boxRole).insertAdjacentHTML("beforeend", markup);
+      return true;
+    };
 
-    /** Add or remove a CLS entry. classList takes ONE token at a time and
-        throws on a string with spaces, so the utility strings in CLS have to
-        be handed over a class at a time. */
-    function paint(el, cls, on) {
-      if (!el || !cls) return;
-      for (const c of cls.split(/\s+/)) {
-        if (!c) continue;
-        if (on) el.classList.add(c);
-        else el.classList.remove(c);
+    /** Play a list of layers into a phone, pausing `gap` after each. */
+    const playLayers = async (z, boxRole, list) => {
+      $(boxRole).innerHTML = "";
+      await z(900);
+      for (const item of list) {
+        if (pushLayer(boxRole, item)) await z(item.gap);
       }
-    }
-
-    /** Move the selection outline to a cell and optionally fill it. */
-    function cell(id, value, formula, cls) {
-      if (current) paint(current, CLS.cellSelected, false);
-      current = $(id);
-      paint(current, CLS.cellSelected, true);
-      $("nameBox").textContent = id;
-      $("formulaBar").textContent = formula || value || "";
-      if (value !== undefined && value !== "") current.textContent = value;
-      if (cls) paint(current, cls, true);
-    }
+    };
 
     /* The five scenes, each an async beat. `z` waits, and throws if the
-       timeline was superseded meanwhile (replay clicked, or unmounted). */
+       timeline was superseded meanwhile (unmounted). */
     const SCENES = [
       async function chat(z) {
-        const box = $("chat");
-        box.innerHTML = `<div class="${CLS.day}">FRIDAY</div>`;
-        const push = (side, sender, color, text, time, ticks, img) => {
-          const cls = side === "in" ? `${CLS.wb} ${CLS.wbIn}` : `${CLS.wb} ${CLS.wbOut}`;
-          box.insertAdjacentHTML("beforeend", bubble(cls, sender, color, text, time, ticks, img));
-        };
-
-        await z(900);
-        push("in", "Chidi, 4B", "#c0392b", "Dues paid ✅", "6:10 PM", true, RECEIPT_SCREENSHOT);
-        await z(1700);
-        push("in", "Ngozi", "#1b7f5c", "Sent mine this morning o", "6:14 PM");
-        await z(1700);
-        push("in", "Tunde", "#a05a00", "I sent 25k. Abeg confirm 🙏", "6:21 PM");
-        await z(1500);
-        $("typing").textContent = "typing…";
-        await z(1700);
-        $("typing").textContent = "48 participants";
-        push("out", null, null, "Which account? The alert has no names 😩", "6:31 PM");
-        await z(2200);
+        hide("chatNote");
+        await playLayers(z, "chat", CHAT_POP);
+        show("chatNote");
+        await z(3000);
       },
 
       async function alerts(z) {
-        const box = $("sms");
-        box.innerHTML = `<div class="${CLS.smsDay}">Today</div>`;
-        $("smsNote").classList.remove("show");
-
-        const ALERTS = [
-          ["25,000.00", "C OKAFOR/MAR", "6:48 PM", "1,284,512.40"],
-          ["25,000.00", "NIP/MOB/0813****/DUES", "6:52 PM", "1,309,512.40"],
-          ["20,000.00", "E NWOSU", "7:05 PM", "1,329,512.40"],
-        ];
-        for (const [amount, desc, time, balance] of ALERTS) {
-          await z(1000);
-          box.insertAdjacentHTML(
-            "beforeend",
-            `<div class="${CLS.sms}">Credit Alert!<br>Acc#: ******548<br>Amt: ${amount}<br>Desc: TRF FROM ${desc}<br>Avail Bal: ${balance}<span class="${CLS.smsMeta}">${time} · SIM 1</span></div>`,
-          );
-        }
-        await z(1200);
-        $("smsNote").classList.add("show");
-        await z(2600);
+        hide("smsNote");
+        await playLayers(z, "sms", SMS_POP);
+        show("smsNote");
+        await z(3000);
       },
 
       async function counting(z) {
-        const pic = $("countingPhoto");
-        $("countingCaption").classList.remove("show");
-        pic.classList.remove("zoom");
-        void pic.offsetWidth; // restart the zoom transition
-        pic.classList.add("zoom");
+        hide("countingCaption");
+        restartZoom("countingPhoto");
         await z(1400);
-        $("countingCaption").classList.add("show");
+        show("countingCaption");
         await z(3400);
       },
 
       async function spreadsheet(z) {
-        buildGrid();
-        current = null;
-
-        ["No", "Name", "Jan", "Feb", "Mar", "Total"].forEach((head, k) => {
-          $(`${"ABCDEF"[k]}4`).textContent = head;
-        });
-
-        await z(700);
-        for (let i = 0; i < 5; i++) {
-          const row = i + 5;
-          const dues = ROWS[i];
-          cell(`A${row}`, i + 1);
-          await z(130);
-          cell(`B${row}`, dues[0]);
-          await z(130);
-          for (let j = 1; j <= 3; j++) {
-            cell(`CDE`[j - 1] + row, dues[j] ? `${dues[j]},000` : "");
-            await z(dues[j] ? 150 : 90);
-          }
-          cell(`F${row}`, `${dues[1] + dues[2] + dues[3]},000`, `=SUM(C${row}:E${row})`);
-          await z(170);
+        hide("sheetNote");
+        const masks = $$("sheetMask");
+        masks.forEach((m) => m.classList.remove("open")); // cover the table
+        await z(900);
+        for (const m of masks) {
+          m.classList.add("open"); // header first, then one row at a time
+          await z(650);
         }
-        cell("B10", "Total");
-        paint($("B10"), CLS.cellBold, true);
-        cell("F10", "280,000", "=SUM(F5:F9)", CLS.cellBold);
         await z(500);
-        cell("A12", "Bank statement");
-        cell("F12", "275,000");
-        await z(500);
-        cell("A13", "Difference", "=F10-F12");
-        paint($("A13"), CLS.cellBad, true);
-        // The value belongs here: the port coloured F13 but never wrote to it,
-        // so the mismatch the whole scene is about ended on a blank cell.
-        cell("F13", "-5,000", "=F10-F12", CLS.cellBad);
-        paint($("F13"), CLS.cellBold, true);
-        await z(2400);
+        show("sheetNote");
+        await z(3200);
       },
 
       async function asking(z) {
         const caption = $("askCaption");
         const line = $("askLine");
-        const pic = $("askPhoto");
         // Type into the span, never the caption itself — setting the
         // caption's textContent would delete the <em> wrapper (and with it
         // the large type and the slide-up) before the line is ever typed.
         line.textContent = "";
         caption.classList.remove("show");
-        pic.classList.remove("zoom");
-        void pic.offsetWidth;
-        pic.classList.add("zoom");
+        restartZoom("askPhoto");
         await z(1400);
         caption.classList.add("show");
         await z(500);
-
-        // Type the member's question out.
         const text = "Did mine reflect?";
         for (let i = 1; i <= text.length; i++) {
           line.textContent = text.slice(0, i);
@@ -370,63 +272,18 @@ export default function ProblemSection() {
       try {
         for (let i = index; i < SCENES.length; i++) {
           $$("scene").forEach((s, k) => s.classList.toggle("on", k === i));
-          // Marks the stage so its height can follow the active scene's content
-          // on phones (see the [data-role="stage"][data-scene] rules in
-          // index.css — the scenes are absolute, so the stage can't size to them).
+          // Marks the stage so index.css can size it per scene on phones.
           $("stage").dataset.scene = String(i);
-          // The spreadsheet stage has to clear the laptop, whose height depends
-          // on the width — re-fit whenever the active scene changes.
-          fit();
           await SCENES[i](wait);
           if (i < SCENES.length - 1) await wait(500);
         }
         await wait(5000);
         play(0);
       } catch {
-        /* stopped: replay clicked or component unmounted */
+        /* stopped: component unmounted */
       }
     }
 
-    /* The spreadsheet mock is authored at a fixed 724px width and scaled down
-       to fit whatever column it lands in. */
-    function fit() {
-      const stage = $("stage");
-      const mock = $("mock");
-      const wrap = $("mockWrap");
-      if (!stage || !mock) return;
-      const scale = Math.min(1, (stage.clientWidth - 20) / 724);
-      mock.style.transform = `scale(${scale})`;
-      /* offsetHeight ignores the transform, so this is the mock's real layout
-         height. Collapsing the wrapper to the *scaled* height is what makes the
-         scene's justify-center land the laptop in the middle: without it flex
-         centres the unscaled box and the shrunken laptop hangs off its top edge. */
-      if (wrap) wrap.style.height = `${Math.round(mock.offsetHeight * scale)}px`;
-      /* index.css sizes the stage per scene on phones, and its spreadsheet
-         height (280px) is tuned for a ~206px laptop. The laptop's height is
-         width-dependent, so in the band above phones it grows past that and the
-         stage would clip it top and bottom. Grow the stage to clear the laptop,
-         never shrink it below the stylesheet's value — that keeps the reduced
-         phone height while stopping the tablet/small-laptop clip. */
-      if (stage.dataset.scene === "3") {
-        /* Read the stylesheet's own height with the transition suppressed —
-           fit() runs the instant data-scene flips, and mid-transition
-           getComputedStyle reports whatever value it is animating *through*
-           (an inflated one here), which would make the comparison below always
-           lose. */
-        const running = stage.style.transition;
-        stage.style.transition = "none";
-        void stage.offsetHeight; // flush the style change
-        const cssMin = parseFloat(getComputedStyle(stage).minHeight) || 0;
-        stage.style.transition = running;
-        const needed = Math.round(mock.offsetHeight * scale) + 32;
-        if (needed > cssMin) stage.style.minHeight = `${needed}px`;
-      } else if (stage.style.minHeight) {
-        stage.style.minHeight = "";
-      }
-    }
-
-    fit();
-    window.addEventListener("resize", fit);
     let started = false;
     if ("IntersectionObserver" in window) {
       observer = new IntersectionObserver(
@@ -447,9 +304,15 @@ export default function ProblemSection() {
     return () => {
       R++; // cancel anything in flight
       if (observer) observer.disconnect();
-      window.removeEventListener("resize", fit);
     };
   }, []);
+
+  const signal = asset("icon-signal.svg");
+  const chatHeader = asset("chat-header.svg");
+  const chatWallpaper = asset("chat-wallpaper.svg");
+  const bottomBar = asset("bottom-bar.svg");
+  const smsInput = asset("sms-input.svg");
+  const plusIcon = asset("icon-plus.svg");
 
   return (
     <section
@@ -459,18 +322,18 @@ export default function ProblemSection() {
       <div className="mx-auto max-w-[1200px]">
         {/* ── Header ── */}
         <header className="mx-auto max-w-[900px] text-center">
-          <div className="inline-flex items-center rounded-full border border-brand-deep/25 px-5 py-2 text-[13px] font-medium text-brand-deep">
+          <div className="text-[14px] font-semibold tracking-[0.04em] text-brand-deep uppercase">
             The Problem
           </div>
-          <h2 className="mt-[18px] w-full text-center font-[Inter,sans-serif] text-[clamp(32px,3.89vw,56px)] leading-normal font-bold text-brand-navy">
-            Still spending weekends chasing payments?
+          <h2 className="mt-[18px] w-full text-balance text-center font-[Inter,sans-serif] text-[clamp(32px,3.89vw,56px)] leading-[1.15] font-bold text-brand-navy">
+            Monitoring Payments Shouldn&apos;t Be This Hard
           </h2>
           <p className="mx-auto mt-4 max-w-[56ch] text-[clamp(15px,2vw,17px)] leading-[1.7]">
             Without centralized visibility, time is wasted and trust begins to weaken.
           </p>
         </header>
 
-        <div className="mt-10 grid gap-8 md:grid-cols-2 md:gap-12">
+        {/* <div className="mt-10 grid gap-8 md:grid-cols-2 md:gap-12">
           <article className="flex items-start gap-4">
             <span className="grid size-12 flex-none place-items-center rounded-full border border-[#ecedf3] bg-white/70 text-[#002fa7] md:size-16">
               <Clock3 aria-hidden="true" size={24} strokeWidth={1.7} />
@@ -498,276 +361,214 @@ export default function ProblemSection() {
               </p>
             </div>
           </article>
-        </div>
+        </div> */}
 
         {/* ── Player ── */}
         <div data-role="player" className="mt-10">
           <div
             data-role="stage"
-            className="relative isolate min-h-[640px] overflow-hidden rounded-[20px] border border-black/10 transition-[min-height] duration-500 max-[1040px]:min-h-[620px] max-[600px]:min-h-[620px]"
+            className="relative isolate min-h-[640px] overflow-hidden rounded-sm border border-black/10 transition-[min-height] duration-500 max-[1040px]:min-h-[620px] max-[600px]:min-h-[620px]"
           >
-            <ProblemStoryBackdrop className="absolute inset-0 rounded-[20px]" />
+            <ProblemStoryBackdrop className="absolute inset-0 rounded-sm" />
+
             {/* ── Scene 1: group chat ── */}
-            <div
-              data-role="scene"
-              className="scene absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 invisible translate-x-10 [clip-path:inset(0_0_0_100%)] transition-[clip-path,transform,visibility] duration-750 [&.on]:visible [&.on]:translate-x-0 [&.on]:[clip-path:inset(0)] [&.on]:delay-0"
-            >
-              <div className="relative h-[572px] w-[262px] flex-none rounded-[46px] bg-[linear-gradient(145deg,#d9d9dd,#8d8e94_40%,#c9cace_70%,#9a9ba1)] p-[5px] shadow-[0_0_0_1.5px_#6e6f75_inset,0_28px_40px_#00000040,0_6px_12px_#00000026] before:absolute before:-left-[3px] before:top-[118px] before:h-6 before:w-[3px] before:rounded-l-sm before:bg-[#8d8e94] before:shadow-[0_48px_0_#8d8e94,0_98px_0_#8d8e94] before:content-[''] after:absolute after:-right-[3px] after:top-40 after:h-[70px] after:w-[3px] after:rounded-r-sm after:bg-[#8d8e94] after:content-['']">
-                <div className="relative flex h-full flex-col overflow-hidden rounded-[41px] border-[3px] border-[#050506] bg-white font-[-apple-system,'SF_Pro_Text',Roboto,'Segoe_UI',system-ui,sans-serif] before:absolute before:top-2 before:left-1/2 before:z-3 before:h-[21px] before:w-18 before:-ml-9 before:rounded-full before:bg-black before:content-[''] after:absolute after:bottom-1.5 after:left-1/2 after:z-3 after:h-1 after:w-21 after:-ml-[42px] after:rounded after:bg-black after:content-['']">
-                  <div
-                    style={{ background: "#008069" }}
-                    className="flex h-10 items-center justify-between pt-2 pr-[26px] pl-[26px] text-[11.5px] font-semibold text-white"
-                  >
-                    <span>6:31</span>
-                    <span>▂▄▆ 5G ▮</span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-[#008069] pb-2 pr-2.5 pl-0 text-white">
-                    <span>←</span>
-                    <span className="size-[34px] flex-none rounded-full bg-[#dfe5e7] bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2024%2024%27%3E%3Cpath%20fill=%27%23fff%27%20d=%27M12%2012a4%204%200%20100-8%204%204%200%200%208zm0%202c-3%200-8%201.5-8%204v2h16v-2c0-2.5-5-4-8-4z%27/%3E%3C/svg%3E')] bg-[length:80%] bg-center bg-no-repeat" />
-                    <div>
-                      <b className="block text-[14.5px] font-medium leading-[1.15]">
-                        Ikeja Traders Club
-                      </b>
-                      <small data-role="typing" className="text-[11px] opacity-85">
-                        48 participants
-                      </small>
-                    </div>
-                    <i className="ml-auto text-[6px] tracking-[6px] not-italic">⋮</i>
-                  </div>
-
-                  <div
-                    data-role="chat"
-                    className="flex flex-1 flex-col justify-end gap-[5px] overflow-hidden bg-[#efeae2] bg-[radial-gradient(rgba(0,0,0,0.04)_1px,transparent_1.5px)] bg-[size:14px_14px] px-2 pt-2 pb-1.5"
-                  />
-
-                  <div className="flex items-center gap-1.5 bg-[#f0f2f5] px-2 pt-1.5 pb-5">
-                    <div className="flex flex-1 items-center gap-2 rounded-[2px] bg-white px-3 py-[7px] text-[12.5px] text-[#8696a0]">
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="17"
-                        height="17"
-                        fill="none"
-                        stroke="#8696a0"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                      >
-                        <circle cx="12" cy="12" r="9" />
-                        <path d="M8.5 14c1 1.6 2.2 2.3 3.5 2.3s2.5-.7 3.5-2.3" />
-                        <circle cx="9" cy="10" r=".6" fill="#8696a0" />
-                        <circle cx="15" cy="10" r=".6" fill="#8696a0" />
-                      </svg>
-                      <span className="flex-1">Message</span>
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="17"
-                        height="17"
-                        fill="none"
-                        stroke="#8696a0"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M20 11.5l-7.6 7.6a5 5 0 01-7-7l8-8a3.3 3.3 0 014.7 4.7l-8 8a1.7 1.7 0 01-2.4-2.4l7.2-7.2" />
-                      </svg>
-                      <svg
-                        viewBox="0 0 24 24"
-                        width="17"
-                        height="17"
-                        fill="none"
-                        stroke="#8696a0"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M4 8h3l1.5-2h7L17 8h3v11H4z" />
-                        <circle cx="12" cy="13" r="3.2" />
-                      </svg>
-                    </div>
-                    <i className="grid size-[34px] flex-none place-items-center rounded-full bg-[#008069]">
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff">
-                        <path d="M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 006 6.92V22h2v-3.08A7 7 0 0019 12h-2z" />
-                      </svg>
-                    </i>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ── Scene 2: bank SMS ── */}
-            <div
-              data-role="scene"
-              className="scene absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 invisible translate-x-10 [clip-path:inset(0_0_0_100%)] transition-[clip-path,transform,visibility] duration-750 [&.on]:visible [&.on]:translate-x-0 [&.on]:[clip-path:inset(0)] [&.on]:delay-0"
-            >
-              {/* Phone and its callout sit side by side on desktop — the
-                  dashed connector in the note points at the phone, and a
-                  572px phone plus a note below it is taller than the 640px
-                  stage, which clipped the phone's top. Phones stack them. */}
-              <div className="flex items-center justify-center max-[600px]:flex-col max-[600px]:items-center">
-                <div className="relative h-[572px] w-[262px] flex-none rounded-[46px] bg-[linear-gradient(145deg,#d9d9dd,#8d8e94_40%,#c9cace_70%,#9a9ba1)] p-[5px] shadow-[0_0_0_1.5px_#6e6f75_inset,0_28px_40px_#00000040,0_6px_12px_#00000026] before:absolute before:-left-[3px] before:top-[118px] before:h-6 before:w-[3px] before:rounded-l-sm before:bg-[#8d8e94] before:shadow-[0_48px_0_#8d8e94,0_98px_0_#8d8e94] before:content-[''] after:absolute after:-right-[3px] after:top-40 after:h-[70px] after:w-[3px] after:rounded-r-sm after:bg-[#8d8e94] after:content-['']">
-                  <div className="relative flex h-full flex-col overflow-hidden rounded-[41px] border-[3px] border-[#050506] bg-white font-[-apple-system,'SF_Pro_Text',Roboto,'Segoe_UI',system-ui,sans-serif] before:absolute before:top-2 before:left-1/2 before:z-3 before:h-[21px] before:w-18 before:-ml-9 before:rounded-full before:bg-black before:content-[''] after:absolute after:bottom-1.5 after:left-1/2 after:z-3 after:h-1 after:w-21 after:-ml-[42px] after:rounded after:bg-black after:content-['']">
-                    <div className="flex h-10 items-center justify-between pt-2 pr-[26px] pl-[26px] text-[11.5px] font-semibold text-[#202124]">
-                      <span>7:08</span>
-                      <span>▂▄▆ 5G ▮</span>
-                    </div>
-                    <div className="flex items-center gap-2.5 border-b border-[#eee] bg-white pt-0.5 pr-3 pb-2 pl-3 text-[#202124]">
-                      <span className="text-[20px]">←</span>
-                      <span className="size-8 rounded-full bg-[#a142f4] bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2024%2024%27%3E%3Cpath%20fill=%27%23fff%27%20d=%27M12%2012a4%204%200%20100-8%204%204%200%200%208zm0%202c-3%200-8%201.5-8%204v2h16v-2c0-2.5-5-4-8-4z%27/%3E%3C/svg%3E')] bg-[length:78%] bg-center bg-no-repeat" />
-                      <b className="text-[16px] font-medium">CITYBANK</b>
-                      <i className="ml-auto font-bold not-italic">⋮</i>
-                    </div>
-
-                    <div
-                      data-role="sms"
-                      className="flex flex-1 flex-col justify-end gap-3 overflow-hidden bg-white px-3 pt-2 pb-2 text-[#202124]"
-                    />
-
-                    <div className="flex gap-2.5 border-t border-[#eee] px-3 pt-2 pb-5 text-[13px] text-[#5f6368]">
-                      <div className="flex-1 rounded-[2px] border border-[#dadce0] px-3.5 py-[7px]">
-                        Text message
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
+            <div data-role="scene" className={SCENE}>
+              <div className="flex items-center justify-center max-[760px]:flex-col">
                 <div
-                  data-role="smsNote"
-                  className="mt-[120px] flex items-center [clip-path:inset(0_100%_0_0)] transition-[clip-path] duration-700 [&.show]:[clip-path:inset(0)] max-[600px]:mt-3 max-[600px]:flex-col max-[600px]:items-center"
+                  className={PHONE}
+                  role="img"
+                  aria-label="A WhatsApp group chat where the admin lists the dues payable this Friday and a member posts a payment receipt"
                 >
-                  <i className="w-[46px] flex-none border-t-2 border-dashed border-[#e0ab88] max-[600px]:h-7 max-[600px]:w-auto max-[600px]:border-t-0 max-[600px]:border-l-2" />
-                  <span className="max-w-[210px] rounded-lg border-l-4 border-[#e0ab88] bg-white px-4 py-3 text-[15px] leading-[1.35] font-medium text-[#0f1d6e] shadow-[0_8px_24px_#0000001a]">
-                    Who is C Okafor? Which member? Which due?
+                  <div
+                    className={`${SCREEN} bg-[#efeae2] bg-cover bg-center`}
+                    style={chatWallpaper ? { backgroundImage: `url(${chatWallpaper})` } : undefined}
+                  >
+                    <div className="flex-none bg-[#f7f7f7]">
+                      <StatusBar signal={signal} />
+                      {chatHeader && (
+                        <img
+                          src={chatHeader}
+                          alt=""
+                          draggable="false"
+                          className="block h-11 w-full"
+                        />
+                      )}
+                    </div>
+                    {/* Messages stack from the top and are clipped by the bar
+                        below, as in the Figma. */}
+                    <div
+                      data-role="chat"
+                      className="flex min-h-0 flex-1 flex-col items-start gap-[11px] overflow-hidden pt-[17px]"
+                    />
+                    {bottomBar && (
+                      <img
+                        src={bottomBar}
+                        alt=""
+                        draggable="false"
+                        className="relative z-10 block h-[66px] w-full flex-none"
+                      />
+                    )}
+                  </div>
+                  <img src={phoneFrame} alt="" draggable="false" className={FRAME} />
+                </div>
+                <div data-role="smsNote" className={`mt-[120px] max-[760px]:mt-4 ${NOTE_WRAP}`}>
+                  <i className={NOTE_LINE} />
+                  <span className={NOTE_CARD}>
+                    Everyone says they&apos;ve paid. Who actually did?
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* ── Scene 3: counting by hand ── */}
-            <div
-              data-role="scene"
-              className="scene absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 invisible translate-x-10 [clip-path:inset(0_0_0_100%)] transition-[clip-path,transform,visibility] duration-750 [&.on]:visible [&.on]:translate-x-0 [&.on]:[clip-path:inset(0)] [&.on]:delay-0"
-            >
-              <div
-                data-role="countingPhoto"
-                className="relative h-[480px] w-[min(100%,680px)] overflow-hidden rounded-[20px] shadow-[0_24px_50px_#00000026] max-[1040px]:h-[380px] max-[600px]:h-[300px]"
-              >
-                <img
-                  src={cldUrl("glass/problem/naira-count", { width: 1000 })}
-                  alt="A man in a market counting a thick bundle of worn naira notes by hand"
-                  className="block h-full w-full scale-100 object-cover transition-transform duration-[9s] ease-out [transform-origin:60%_40%] [.zoom_&]:scale-110"
-                />
+            {/* ── Scene 2: bank SMS ── */}
+            <div data-role="scene" className={SCENE}>
+              <div className="flex items-center justify-center max-[760px]:flex-col">
                 <div
-                  data-role="countingCaption"
-                  className="absolute inset-x-0 bottom-0 bg-[linear-gradient(to_top,rgba(14,14,16,0.94),rgba(14,14,16,0.62)_50%,transparent)] px-7 pt-[90px] pb-[26px] text-white [clip-path:inset(100%_0_0_0)] transition-[clip-path] duration-800 [&.show]:[clip-path:inset(0)]"
+                  className={PHONE}
+                  role="img"
+                  aria-label="Bank credit-alert text messages that show an amount and a sender name but not which member or which due"
                 >
-                  <small className="flex items-center gap-2.5 text-[11.5px] font-semibold tracking-[0.12em] text-[#b9b9c0] uppercase before:w-[26px] before:border-t-2 before:border-[#e0ab88] before:content-['']">
-                    Sat · 10:05 AM
-                  </small>
-                  <em className="mt-2 block translate-y-[14px] text-[clamp(20px,2.6vw,28px)] leading-[1.2] font-semibold tracking-[-0.02em] not-italic transition-transform delay-250 [&.show]:translate-y-0">
-                    Alerts, notes and screenshots, one by one…
-                  </em>
+                  <div className={`${SCREEN} bg-white`}>
+                    {/* Status bar + contact header. */}
+                    <div className="flex-none border-b border-[#dcdce0] bg-[#f7f7f8] pb-2">
+                      <StatusBar signal={signal} />
+                      <div className="relative flex flex-col items-center gap-1">
+                        <span className="absolute top-1 left-3 flex items-center gap-1 text-[#007aff]">
+                          <svg
+                            width="9"
+                            height="15"
+                            viewBox="0 0 9 15"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M7.500 1.500 1.800 7.500l5.700 6"
+                              stroke="#007aff"
+                              strokeWidth="2.200"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          <span className="rounded-full bg-[#007aff] px-2 py-px text-[12px] leading-[1.35] font-medium text-white">
+                            134
+                          </span>
+                        </span>
+                        <span className="grid size-9 place-items-center rounded-full bg-[#a6a6ab]">
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="#fff"
+                            aria-hidden="true"
+                          >
+                            <path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-3 0-8 1.500-8 4v2h16v-2c0-2.500-5-4-8-4z" />
+                          </svg>
+                        </span>
+                        <span className="text-[12px] leading-none text-black">
+                          +234 9850 0045 <span className="text-[#a6a6ab]">›</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div
+                      data-role="sms"
+                      className="flex min-h-0 flex-1 flex-col items-start gap-2.5 overflow-hidden bg-white pt-3"
+                    />
+
+                    {/* Input row: + button, message pill, home indicator. */}
+                    <div className="relative z-10 flex-none bg-white">
+                      <div className="flex items-center gap-2 px-3 pt-1.5">
+                        <span className="grid size-[26px] flex-none place-items-center rounded-full bg-[#e5e5ea]">
+                          {plusIcon && (
+                            <img src={plusIcon} alt="" draggable="false" className="block size-3" />
+                          )}
+                        </span>
+                        {smsInput && (
+                          <img
+                            src={smsInput}
+                            alt=""
+                            draggable="false"
+                            className="block h-[26px] w-[196px]"
+                          />
+                        )}
+                      </div>
+                      <div className="mx-auto mt-2 mb-2 h-1 w-[88px] rounded-full bg-black" />
+                    </div>
+                  </div>
+                  <img src={phoneFrame} alt="" draggable="false" className={FRAME} />
+                </div>
+                <div data-role="smsNote" className={`mt-[120px] max-[760px]:mt-3 ${NOTE_WRAP}`}>
+                  <i className={NOTE_LINE} />
+                  <span className={NOTE_CARD}>Who is J Ngozi? Which member? Which due?</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Scene 3: counting by hand ── */}
+            <div data-role="scene" className={SCENE}>
+              <div data-role="countingPhoto" className={PHOTO}>
+                <img
+                  src={photo("naira-count", 1000)}
+                  alt="A man in a market counting a thick bundle of worn naira notes by hand"
+                  className={PHOTO_IMG}
+                />
+                <div data-role="countingCaption" className={CAPTION_BASE}>
+                  <small className={KICKER}>Sat · 10:05 AM</small>
+                  <em className={CAPTION_TEXT}>Alerts, notes and screenshots, one by one…</em>
                 </div>
               </div>
             </div>
 
             {/* ── Scene 4: the spreadsheet ── */}
-            <div
-              data-role="scene"
-              className="scene absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 invisible translate-x-10 [clip-path:inset(0_0_0_100%)] transition-[clip-path,transform,visibility] duration-750 [&.on]:visible [&.on]:translate-x-0 [&.on]:[clip-path:inset(0)] [&.on]:delay-0"
-            >
-              {/* The wrapper exists only to carry the scaled height — see
-                  fit(). The scene centres its flex child, but a CSS transform
-                  does not change layout size, so the mock's full 724x441 box
-                  would be centred while the visible laptop shrank toward its top
-                  edge (origin-top), stranding it above a pool of empty space. */}
-              <div data-role="mockWrap" className="flex w-full flex-col items-center">
-                <div
-                  data-role="mock"
-                  className="w-[724px] flex-none flex flex-col items-center drop-shadow-[0_30px_40px_#02061f99] max-[1040px]:origin-top"
-                >
-                  <div className="relative w-[660px] rounded-[18px_18px_4px_4px] border-2 border-[#d3d5db] bg-[#0a0a0c] px-3 pt-3 pb-3.5 before:absolute before:top-1 before:left-1/2 before:size-1 before:rounded-full before:bg-[#2a2c34] before:content-['']">
-                    <div className="h-[398px] overflow-hidden rounded-[3px] bg-white font-['Segoe_UI',Calibri,Helvetica,Arial,sans-serif]">
-                      <div className="flex items-center justify-between border-b border-[#d9d9d9] bg-[#f4f4f5] px-2.5 py-1.5 text-[12px] text-[#333]">
-                        <span className="flex gap-[7px]">
-                          <i className="size-[11px] rounded-full bg-[#ff5f57]" />
-                          <i className="size-[11px] rounded-full bg-[#febc2e]" />
-                          <i className="size-[11px] rounded-full bg-[#28c840]" />
-                        </span>
-                        <span className="font-medium">dues_march_FINAL_v3.xlsx</span>
-                        <span />
-                      </div>
-                      <div className="flex gap-4 border-b border-[#e0e0eb] bg-white px-2.5 py-[5px] text-[11.5px] text-[#333]">
-                        <b className="border-b-2 border-[#217346] pb-[3px] font-semibold">Home</b>
-                        <span>Insert</span>
-                        <span>Draw</span>
-                        <span>Page Layout</span>
-                        <span>Formulas</span>
-                        <span>Data</span>
-                        <span>Review</span>
-                        <span>View</span>
-                      </div>
-                      <div className="flex border-b border-[#e0e0eb] text-[12px]">
-                        <div data-role="nameBox" className="border-r border-[#e0e0eb] px-2 py-1">
-                          A1
-                        </div>
-                        <div
-                          data-role="formulaBar"
-                          className="min-h-6 flex-1 px-2 py-1 before:text-[#888] before:font-semibold before:not-italic before:content-['fx_']"
-                        />
-                      </div>
-                      {/* The screen above is a fixed 398px with overflow-hidden, so
-                        everything inside it has to add up to that: title bar 32 +
-                        ribbon 34 + formula bar 28 + sheet tabs 33 = 127, leaving
-                        271 for the grid. The table itself cannot be the clipper —
-                        `height` on a <table> is only a minimum, so it grows to fit
-                        its 14 rows and pushed the sheet tabs clean out of the
-                        screen at every width. Hence the wrapper: it owns the
-                        height, the table stays a real table (buildGrid injects
-                        bare <tr> markup, which only survives in a table context)
-                        and its overflow is clipped at the frame edge like a real
-                        spreadsheet viewport. */}
-                      <div className="h-[271px] overflow-hidden">
-                        <table
-                          data-role="grid"
-                          className="w-full table-fixed border-collapse border-[#dcdcdc]"
-                        />
-                      </div>
-                      <div className="flex gap-0.5 border-t border-[#e0e0eb] bg-[#f4f4f5] px-2 py-1 text-[11.5px]">
-                        <span className="rounded-b bg-white px-3 py-[3px] font-semibold text-[#217346] shadow-[inset_0_2px_0_#217346]">
-                          Sheet1
-                        </span>
-                        <span className="rounded-b bg-[#e4e4e4] px-3 py-[3px]">Jan</span>
-                        <span className="rounded-b bg-[#e4e4e4] px-3 py-[3px]">Feb</span>
-                        <span className="rounded-b bg-[#e4e4e4] px-3 py-[3px]">Mar</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="relative mt-[-1px] h-[14px] w-[724px] rounded-b-[18px/14px] bg-[linear-gradient(#e9eaee,#b7bac3)] before:absolute before:top-0 before:left-1/2 before:h-[5px] before:w-[110px] before:-ml-[55px] before:rounded-b-lg before:bg-[#9b9ea8] before:content-['']" />
+            <div data-role="scene" className={SCENE}>
+              <div className="flex items-center justify-center max-[760px]:flex-col">
+                <div className={`${DEVICE} relative aspect-square w-[540px] max-w-full`}>
+                  <img
+                    src={laptopSheet}
+                    width="540"
+                    height="540"
+                    alt="A spreadsheet of members, amounts and due names, with payment statuses of Paid, Unpaid and Incomplete"
+                    className="block h-full w-full"
+                  />
+                  {/* White masks sit over the table and lift one row at a time,
+                      so the sheet appears to fill in. Positions are the
+                      measured row bounds of the 540×540 export, as %. */}
+                  {SHEET_ROWS.map(([top, bottom], k) => (
+                    <div
+                      key={k}
+                      data-role="sheetMask"
+                      aria-hidden="true"
+                      style={{
+                        top: `${(top / 540) * 100}%`,
+                        height: `${((bottom - top + 1) / 540) * 100}%`,
+                      }}
+                      className="absolute left-[15.6%] w-[68.8%] bg-white transition-opacity duration-500 [&.open]:opacity-0"
+                    />
+                  ))}
+                </div>
+                <div data-role="sheetNote" className={`mt-6 max-[760px]:mt-3 ${NOTE_WRAP}`}>
+                  <i className={NOTE_LINE} />
+                  <span className={NOTE_CARD}>
+                    Paid, unpaid, incomplete… and none of it is proven.
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* ── Scene 5: the member asks ── */}
-            <div
-              data-role="scene"
-              className="scene absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 invisible translate-x-10 [clip-path:inset(0_0_0_100%)] transition-[clip-path,transform,visibility] duration-750 [&.on]:visible [&.on]:translate-x-0 [&.on]:[clip-path:inset(0)] [&.on]:delay-0"
-            >
-              <div
-                data-role="askPhoto"
-                className="relative h-[480px] w-[min(100%,680px)] overflow-hidden rounded-[20px] shadow-[0_24px_50px_#00000026] max-[1040px]:h-[380px] max-[600px]:h-[300px]"
-              >
+            <div data-role="scene" className={SCENE}>
+              <div data-role="askPhoto" className={PHOTO}>
                 <img
-                  src={cldUrl("glass/problem/member-phone", { width: 1000 })}
+                  src={photo("member-phone", 1000)}
                   alt="A member looking away from a table while holding his phone"
-                  className="block h-full w-full scale-100 object-cover transition-transform duration-[9s] ease-out [transform-origin:60%_40%] [.zoom_&]:scale-110"
+                  className={PHOTO_IMG}
                 />
                 <div
                   data-role="askCaption"
-                  className="absolute inset-x-0 bottom-0 bg-[linear-gradient(to_top,rgba(14,14,16,0.94),rgba(14,14,16,0.62)_50%,transparent)] px-7 pt-[90px] pb-[26px] text-white [clip-path:inset(100%_0_0_0)] transition-[clip-path] duration-800 [&.show]:[clip-path:inset(0)] [&.show>em]:translate-y-0 after:ml-1 after:inline-block after:h-[0.95em] after:w-[3px] after:translate-y-[1px] after:bg-[#e0ab88] after:align-[2px] after:animate-[var(--animate-gps-blink)] after:content-['']"
+                  className={`${CAPTION_BASE} after:ml-1 after:inline-block after:h-[0.95em] after:w-[3px] after:translate-y-[1px] after:bg-[#e0ab88] after:align-[2px] after:animate-[var(--animate-gps-blink)] after:content-['']`}
                 >
-                  <small className="flex items-center gap-2.5 text-[11.5px] font-semibold tracking-[0.12em] text-[#b9b9c0] uppercase before:w-[26px] before:border-t-2 before:border-[#e0ab88] before:content-['']">
-                    Member · Chidi, 4B
-                  </small>
-                  <em className="mt-2 block translate-y-[14px] text-[clamp(20px,2.6vw,28px)] leading-[1.2] font-semibold tracking-[-0.02em] not-italic transition-transform delay-250 [&.show>em]:translate-y-0">
+                  <small className={KICKER}>Member · Chidi, 4B</small>
+                  <em className={CAPTION_TEXT}>
                     <span data-role="askLine" />
                   </em>
                 </div>

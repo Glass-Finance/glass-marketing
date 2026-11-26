@@ -96,8 +96,8 @@ export default function OrganizationHowItWorks() {
     if (!el) return undefined;
     if (!("IntersectionObserver" in window)) {
       // setState directly is fine - not in render, effect runs after render
-      setStarted(true)  # eslint-disable-line react-hooks/set-state-in-effect
-setInView(true)  # eslint-disable-line react-hooks/set-state-in-effect
+      setStarted(true)
+setInView(true)  
       return undefined;
     }
     const observer = new IntersectionObserver(
