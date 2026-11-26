@@ -1376,8 +1376,8 @@ section {
    branch — neither is touched. Selectors avoid Crisp's hashed cc-* classes
    on purpose. img-src 'self' in vercel.json covers the self-hosted SVG. */
 #crisp-chatbox > div > div[role="button"] {
-  width: 30px !important;
-  height: 30px !important;
+  width: 32px !important;
+  height: 32px !important;
 }
 
 /* The icon layer is ONE span that Crisp toggles between data-id
@@ -1388,7 +1388,7 @@ section {
 #crisp-chatbox > div > div[role="button"] span[data-id="chat_opened"] {
   background-color: #002fa7 !important;
   background-image: url("/crisp-launcher-glyph.svg") !important;
-  background-size: 16px 16px !important;
+  background-size: 24px 24px !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
 }

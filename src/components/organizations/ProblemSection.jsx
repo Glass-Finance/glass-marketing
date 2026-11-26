@@ -322,10 +322,10 @@ export default function ProblemSection() {
       <div className="mx-auto max-w-[1200px]">
         {/* ── Header ── */}
         <header className="mx-auto max-w-[900px] text-center">
-          <div className="text-[14px] font-semibold tracking-[0.04em] text-brand-deep uppercase">
+           <span className="inline-flex items-center border border-brand-deep/25 text-brand-deep text-[13px] font-medium px-5 py-2 rounded-full">
             The Problem
-          </div>
-          <h2 className="mt-[18px] w-full text-balance text-center font-[Inter,sans-serif] text-[clamp(32px,3.89vw,56px)] leading-[1.15] font-bold text-brand-navy">
+          </span>
+          <h2 className="text-[clamp(26px,5vw,58px)] font-bold text-brand-ink leading-[1.15] tracking-[-0.02em] mb-4">
             Monitoring Payments Shouldn&apos;t Be This Hard
           </h2>
           <p className="mx-auto mt-4 max-w-[56ch] text-[clamp(15px,2vw,17px)] leading-[1.7]">

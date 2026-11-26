@@ -55,7 +55,9 @@ export default function CrispChat() {
 
   useEffect(() => {
     if (!websiteId || configured.current) return;
+
     Crisp.configure(websiteId, { sessionMerge: true });
+
     configured.current = true;
   }, [websiteId]);
 
